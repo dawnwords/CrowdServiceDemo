@@ -1,22 +1,22 @@
-package edu.fudan.se.crowdservice.priceassessment;
+package edu.fudan.se.crowdservice.siteinspection;
 
 import edu.fudan.se.crowdservice.MyThreadPool;
 
 import javax.xml.ws.Endpoint;
 
-public class AssessPriceServicePublisher {
+public class InspectSiteServicePublisher {
 
     private Endpoint endpoint;
 
     public static void main(String[] args) {
-        AssessPriceServicePublisher self = new AssessPriceServicePublisher();
+        InspectSiteServicePublisher self = new InspectSiteServicePublisher();
         self.create_endpoint();
         self.configure_endpoint();
         self.publish();
     }
 
     private void create_endpoint() {
-        endpoint = Endpoint.create(new AssessPriceServiceImpl());
+        endpoint = Endpoint.create(new InspectSiteServiceImpl());
     }
 
     private void configure_endpoint() {
@@ -24,12 +24,12 @@ public class AssessPriceServicePublisher {
     }
 
     private void publish() {
-        int port = 8888;
+        int port = 8887;
 //        String ip = "10.131.253.172";
         String ip = "192.168.0.103";
-        String url = String.format("http://%s:%d/priceassess", ip, port);
+        String url = String.format("http://%s:%d/siteinspect", ip, port);
         endpoint.publish(url);
-        System.out.println("Publishing Price Assessment Service:" + url);
+        System.out.println("Publishing Site Inspection Service:" + url);
     }
 
 }

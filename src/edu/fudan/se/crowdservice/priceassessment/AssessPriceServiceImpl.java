@@ -18,7 +18,7 @@ public class AssessPriceServiceImpl implements AssessPriceService {
 			String compositeService, String brand, String series,
 			String newness, String CPU, String memory, String hardDisk,
 			String base64Image) {
-		String xmlDoc = "<Root><Description>Please accesss the price of the given second-hand "
+		String xmlDoc = "<Root><Description>Please access the price of the given second-hand "
 				+ "computer configuration based on the photo given.</Description>"
 				+ "<TextDisplay><Key>Brand</Key><Value>"
 				+ brand
