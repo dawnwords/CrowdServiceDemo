@@ -5,14 +5,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public abstract class BaseDBOperator<T> {
-	private final static String url = "jdbc:mysql://localhost:3306/crowdservice?user=root&password=";
+	private final static String url = "jdbc:mysql://10.131.252.156:3306/crowdservice?user=root&password=cloudfdse";
 
 	private Connection connect() throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.jdbc.Driver").newInstance();
-		Connection conn = DriverManager.getConnection(url);
-
-		return conn;
+		return DriverManager.getConnection(url);
 	}
 
 	public T getResult() {
