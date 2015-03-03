@@ -25,8 +25,7 @@ public class InspectSiteServicePublisher {
 
     private void publish() {
         int port = 8887;
-//        String ip = "10.131.253.172";
-        String ip = "192.168.0.103";
+        String ip = "10.131.253.211";
         String url = String.format("http://%s:%d/siteinspect", ip, port);
         endpoint.publish(url);
         System.out.println("Publishing Site Inspection Service:" + url);

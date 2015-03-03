@@ -3,6 +3,7 @@ package edu.fudan.se.agent;
 import edu.fudan.se.agent.behaviour.ReceiveCapacityBehaviour;
 import edu.fudan.se.agent.behaviour.ReceiveHeartbeatBehaviour;
 import edu.fudan.se.agent.behaviour.UpdateOnlineBehaviour;
+import edu.fudan.se.crowdservice.wrapper.ConversationType;
 
 
 public class CheckinAgent extends ServerAgent {

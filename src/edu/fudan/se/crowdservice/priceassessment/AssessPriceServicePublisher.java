@@ -25,8 +25,7 @@ public class AssessPriceServicePublisher {
 
     private void publish() {
         int port = 8888;
-//        String ip = "10.131.253.172";
-        String ip = "192.168.0.103";
+        String ip = "10.131.253.211";
         String url = String.format("http://%s:%d/priceassess", ip, port);
         endpoint.publish(url);
         System.out.println("Publishing Price Assessment Service:" + url);

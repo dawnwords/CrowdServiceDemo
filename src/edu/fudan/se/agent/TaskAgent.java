@@ -4,6 +4,7 @@ import edu.fudan.se.agent.behaviour.BroadcastDelegateBehaviour;
 import edu.fudan.se.agent.behaviour.BroadcastRequestBehaviour;
 import edu.fudan.se.agent.behaviour.ReceiveOfferBehaviour;
 import edu.fudan.se.agent.behaviour.ReceiveResponseBehaviour;
+import edu.fudan.se.crowdservice.wrapper.ConversationType;
 
 
 public class TaskAgent extends ServerAgent {
