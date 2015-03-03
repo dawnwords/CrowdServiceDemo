@@ -1,18 +1,33 @@
 package edu.fudan.se.agent.behaviour;
 
-import jade.core.AID;
 import edu.fudan.se.agent.ConversationType;
 import edu.fudan.se.crowdservice.wrapper.OfferWrapper;
+import edu.fudan.se.crowdservice.wrapper.RefuseWrapper;
 import edu.fudan.se.dbopration.InsertOfferOperator;
+import jade.core.AID;
+import jade.lang.acl.ACLMessage;
+
+import java.io.IOException;
 
 public class ReceiveOfferBehaviour extends MessageReceivingBehaviour<OfferWrapper> {
 
-	public ReceiveOfferBehaviour() {
-		super(ConversationType.OFFER);
-	}
-	
-	@Override
-	protected void handleMessage(AID sender, OfferWrapper content) {
-		new InsertOfferOperator(sender.getLocalName(), content.taskId, content.price).getResult();
-	}
+    public ReceiveOfferBehaviour() {
+        super(ConversationType.OFFER);
+    }
+
+    @Override
+    protected void handleMessage(AID sender, OfferWrapper content) {
+        Boolean offerSuccess = new InsertOfferOperator(sender.getLocalName(), content.taskId, content.price).getResult();
+        if (offerSuccess == null || !offerSuccess) {
+            ACLMessage aclMsg = new ACLMessage(ACLMessage.INFORM);
+            aclMsg.setConversationId(ConversationType.REFUSE.name());
+            aclMsg.addReceiver(sender);
+            try {
+                aclMsg.setContentObject(new RefuseWrapper(content.taskId, "Offer Out of Date"));
+                myAgent.send(aclMsg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
