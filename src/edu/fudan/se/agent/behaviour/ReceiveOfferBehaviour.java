@@ -1,6 +1,6 @@
 package edu.fudan.se.agent.behaviour;
 
-import edu.fudan.se.agent.ConversationType;
+import edu.fudan.se.crowdservice.wrapper.ConversationType;
 import edu.fudan.se.crowdservice.wrapper.OfferWrapper;
 import edu.fudan.se.crowdservice.wrapper.RefuseWrapper;
 import edu.fudan.se.dbopration.InsertOfferOperator;
@@ -23,7 +23,7 @@ public class ReceiveOfferBehaviour extends MessageReceivingBehaviour<OfferWrappe
             aclMsg.setConversationId(ConversationType.REFUSE.name());
             aclMsg.addReceiver(sender);
             try {
-                aclMsg.setContentObject(new RefuseWrapper(content.taskId, "Offer Out of Date"));
+                aclMsg.setContentObject(new RefuseWrapper(content.taskId, RefuseWrapper.Reason.OFFER_OUT_OF_DATE));
                 myAgent.send(aclMsg);
             } catch (IOException e) {
                 e.printStackTrace();

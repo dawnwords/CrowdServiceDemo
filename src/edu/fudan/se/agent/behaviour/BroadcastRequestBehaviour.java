@@ -8,7 +8,7 @@ import jade.lang.acl.ACLMessage;
 import java.io.IOException;
 import java.util.List;
 
-import edu.fudan.se.agent.ConversationType;
+import edu.fudan.se.crowdservice.wrapper.ConversationType;
 import edu.fudan.se.bean.MicroTask;
 import edu.fudan.se.crowdservice.wrapper.RequestWrapper;
 import edu.fudan.se.dbopration.SelectOnlineAgentIDOperator;

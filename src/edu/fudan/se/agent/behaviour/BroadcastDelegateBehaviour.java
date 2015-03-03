@@ -1,6 +1,6 @@
 package edu.fudan.se.agent.behaviour;
 
-import edu.fudan.se.agent.ConversationType;
+import edu.fudan.se.crowdservice.wrapper.ConversationType;
 import edu.fudan.se.bean.AgentOffer;
 import edu.fudan.se.bean.MicroTask;
 import edu.fudan.se.crowdservice.kv.KeyValueHolder;
@@ -71,7 +71,7 @@ public class BroadcastDelegateBehaviour extends TickerBehaviour {
                 aclMsg.setConversationId(ConversationType.DELEGATE.name());
                 aclMsg.addReceiver(new AID(offerAgent.guid, false));
                 try {
-                    aclMsg.setContentObject(new RefuseWrapper(offerTask.id, "Offer Not Selected"));
+                    aclMsg.setContentObject(new RefuseWrapper(offerTask.id, RefuseWrapper.Reason.OFFER_NOT_SELECTED));
                     myAgent.send(aclMsg);
                 } catch (IOException e) {
                     e.printStackTrace();
