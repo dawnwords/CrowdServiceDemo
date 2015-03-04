@@ -11,12 +11,9 @@ import edu.fudan.se.dbopration.UpdateMicroTaskOffer2ProcessingOperator;
 import edu.fudan.se.dbopration.UpdateOfferSelectOperator;
 import edu.fudan.se.tfws.CrowdServicePlanner;
 import edu.fudan.se.util.XMLUtil;
-import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
-import jade.lang.acl.ACLMessage;
 
-import java.io.IOException;
 import java.util.List;
 
 public class BroadcastDelegateBehaviour extends TickerBehaviour {
@@ -57,21 +54,15 @@ public class BroadcastDelegateBehaviour extends TickerBehaviour {
         }
 
         private void informRefuse(List<AgentOffer> offerAgents, List<AgentOffer> selectedAgents) {
+            outer:
             for (AgentOffer offerAgent : offerAgents) {
                 for (AgentOffer selectedAgent : selectedAgents) {
                     if (selectedAgent.guid.equals(offerAgent.guid)) {
-                        continue;
+                        continue outer;
                     }
                 }
-                ACLMessage aclMsg = new ACLMessage(ACLMessage.INFORM);
-                aclMsg.setConversationId(ConversationType.DELEGATE.name());
-                aclMsg.addReceiver(new AID(offerAgent.guid, false));
-                try {
-                    aclMsg.setContentObject(new RefuseWrapper(offerTask.id, RefuseWrapper.Reason.OFFER_NOT_SELECTED));
-                    myAgent.send(aclMsg);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                RefuseWrapper content = new RefuseWrapper(offerTask.id, RefuseWrapper.Reason.OFFER_NOT_SELECTED);
+                ACLUtil.sendMessage(myAgent, ConversationType.REFUSE, offerAgent.guid, content);
             }
         }
 
