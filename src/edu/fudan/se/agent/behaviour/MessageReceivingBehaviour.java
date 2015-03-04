@@ -29,6 +29,7 @@ public abstract class MessageReceivingBehaviour<T extends Serializable> extends
         ACLMessage aclMsg = myAgent.receive(mt);
         if (aclMsg != null) {
             try {
+                System.out.printf("%s from %s: %s\n", conversationType.name(), aclMsg.getSender(), aclMsg.getContentObject().toString());
                 handleMessage(aclMsg.getSender(), (T) aclMsg.getContentObject());
             } catch (UnreadableException e) {
                 e.printStackTrace();

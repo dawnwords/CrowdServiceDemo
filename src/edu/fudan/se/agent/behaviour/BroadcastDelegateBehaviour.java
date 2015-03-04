@@ -1,9 +1,9 @@
 package edu.fudan.se.agent.behaviour;
 
-import edu.fudan.se.crowdservice.wrapper.ConversationType;
+import edu.fudan.se.agent.ACLUtil;
 import edu.fudan.se.bean.AgentOffer;
 import edu.fudan.se.bean.MicroTask;
-import edu.fudan.se.crowdservice.kv.KeyValueHolder;
+import edu.fudan.se.crowdservice.wrapper.ConversationType;
 import edu.fudan.se.crowdservice.wrapper.DelegateWrapper;
 import edu.fudan.se.crowdservice.wrapper.RefuseWrapper;
 import edu.fudan.se.dbopration.SelectOfferByMicroTaskOperator;
@@ -15,20 +15,16 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
-import jade.util.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BroadcastDelegateBehaviour extends TickerBehaviour {
 
-    public static final long OFFER_SELECT_PEROID = 1000;
-    private Logger logger = Logger.getJADELogger(getClass().getName());
+    public static final long OFFER_SELECT_PERIOD = 1000;
 
     public BroadcastDelegateBehaviour(Agent a) {
-        super(a, OFFER_SELECT_PEROID);
+        super(a, OFFER_SELECT_PERIOD);
     }
 
     @Override
@@ -81,19 +77,8 @@ public class BroadcastDelegateBehaviour extends TickerBehaviour {
 
         private void informDelegate(List<AgentOffer> selectedAgent) {
             for (AgentOffer selectAgent : selectedAgent) {
-                ACLMessage aclMsg = new ACLMessage(ACLMessage.INFORM);
-                aclMsg.setConversationId(ConversationType.DELEGATE.name());
-                aclMsg.addReceiver(new AID(selectAgent.guid, false));
-                try {
-                    ArrayList<KeyValueHolder> xml2Obj = XMLUtil
-                            .xml2Obj(offerTask.template);
-                    logger.info(Arrays.toString(xml2Obj.toArray()));
-                    aclMsg.setContentObject(new DelegateWrapper(offerTask.id,
-                            xml2Obj));
-                    myAgent.send(aclMsg);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                DelegateWrapper content = new DelegateWrapper(offerTask.id, XMLUtil.xml2Obj(offerTask.template));
+                ACLUtil.sendMessage(myAgent, ConversationType.DELEGATE, selectAgent.guid, content);
             }
         }
     }

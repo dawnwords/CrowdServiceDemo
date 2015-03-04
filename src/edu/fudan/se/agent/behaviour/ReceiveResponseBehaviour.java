@@ -1,12 +1,10 @@
 package edu.fudan.se.agent.behaviour;
 
+import edu.fudan.se.agent.ACLUtil;
 import edu.fudan.se.crowdservice.wrapper.*;
 import edu.fudan.se.dbopration.UpdateResponseOperator;
 import edu.fudan.se.util.XMLUtil;
 import jade.core.AID;
-import jade.lang.acl.ACLMessage;
-
-import java.io.IOException;
 
 public class ReceiveResponseBehaviour extends
         MessageReceivingBehaviour<ResponseWrapper> {
@@ -16,25 +14,18 @@ public class ReceiveResponseBehaviour extends
     }
 
     @Override
-    protected void handleMessage(AID sender, ResponseWrapper content) {
-        Boolean success = new UpdateResponseOperator(sender.getLocalName(), content.taskId,
-                XMLUtil.obj2XML(content.keyValueHolders)).getResult();
+    protected void handleMessage(AID sender, ResponseWrapper response) {
+        Boolean success = new UpdateResponseOperator(sender.getLocalName(), response.taskId,
+                XMLUtil.obj2XML(response.keyValueHolders)).getResult();
+        ConversationType ct;
+        Wrapper content;
         if (success != null && success) {
-            sendMessage(sender, ConversationType.COMPLETE.name(), new CompleteWrapper(content.taskId));
+            ct = ConversationType.COMPLETE;
+            content = new CompleteWrapper(response.taskId);
         } else {
-            sendMessage(sender, ConversationType.REFUSE.name(), new RefuseWrapper(content.taskId, RefuseWrapper.Reason.OFFER_OUT_OF_DATE));
+            ct = ConversationType.REFUSE;
+            content = new RefuseWrapper(response.taskId, RefuseWrapper.Reason.OFFER_OUT_OF_DATE);
         }
-    }
-
-    private void sendMessage(AID sender, String name, Wrapper wrapper) {
-        ACLMessage aclMsg = new ACLMessage(ACLMessage.INFORM);
-        aclMsg.setConversationId(name);
-        aclMsg.addReceiver(sender);
-        try {
-            aclMsg.setContentObject(wrapper);
-            myAgent.send(aclMsg);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ACLUtil.sendMessage(myAgent, ct, sender, content);
     }
 }
