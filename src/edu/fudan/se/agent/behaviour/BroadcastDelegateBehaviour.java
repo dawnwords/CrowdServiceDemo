@@ -68,7 +68,7 @@ public class BroadcastDelegateBehaviour extends TickerBehaviour {
 
         private void informDelegate(List<AgentOffer> selectedAgent) {
             for (AgentOffer selectAgent : selectedAgent) {
-                DelegateWrapper content = new DelegateWrapper(offerTask.id, XMLUtil.xml2Obj(offerTask.template));
+                DelegateWrapper content = new DelegateWrapper(offerTask.id, XMLUtil.xml2Obj(offerTask.template), offerTask.delegateDDL(), selectAgent.offer);
                 ACLUtil.sendMessage(myAgent, ConversationType.DELEGATE, selectAgent.guid, content);
             }
         }

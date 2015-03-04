@@ -40,7 +40,7 @@ public class BroadcastRequestBehaviour extends TickerBehaviour {
             for (AID onlineAgentId : onlineAgentIds) {
                 if (onlineAgentId.getLocalName().equals(initialTask.consumer))
                     continue;
-                RequestWrapper content = new RequestWrapper(initialTask.id, getDescriptionFromTemplate(initialTask.template));
+                RequestWrapper content = new RequestWrapper(initialTask.id, getDescriptionFromTemplate(initialTask.template), initialTask.offerDDL());
                 ACLUtil.sendMessage(myAgent, ConversationType.REQUEST, onlineAgentId, content);
             }
         }
