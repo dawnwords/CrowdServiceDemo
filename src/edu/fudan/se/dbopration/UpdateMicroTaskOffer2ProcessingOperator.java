@@ -16,9 +16,10 @@ public class UpdateMicroTaskOffer2ProcessingOperator extends
 		List<MicroTask> result = new LinkedList<MicroTask>();
 
 		String sql = "select id,template,consumer,cost,deadline,compositeService,crowdService from microtask "
-				+ "where state=? and now() >= date_add(createTime, INTERVAL 0.2*deadline second)";
+				+ "where state=? and now() >= date_add(createTime, INTERVAL ?*deadline second)";
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setInt(1, MicroTask.State.OFFER.ordinal());
+		ps.setDouble(2,MicroTask.OFFER_RATIO);
 		ResultSet rs = ps.executeQuery();
 
 		String idList = "";
