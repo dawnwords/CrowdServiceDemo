@@ -13,6 +13,8 @@ public class MicroTask {
 	public final int deadline;
 	public final String compositeService;
 	public final String crowdService;
+
+	public static final double OFFER_RATIO = 0.2;
 	
 	public MicroTask(long id, String template, String consumer, int cost,
 			int deadline, String compositeService, String crowdService) {
