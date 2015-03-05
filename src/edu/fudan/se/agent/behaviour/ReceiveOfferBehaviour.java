@@ -1,6 +1,5 @@
 package edu.fudan.se.agent.behaviour;
 
-import edu.fudan.se.agent.ACLUtil;
 import edu.fudan.se.crowdservice.wrapper.ConversationType;
 import edu.fudan.se.crowdservice.wrapper.OfferWrapper;
 import edu.fudan.se.crowdservice.wrapper.RefuseWrapper;
