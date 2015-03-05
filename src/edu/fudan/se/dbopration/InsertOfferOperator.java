@@ -36,7 +36,7 @@ public class InsertOfferOperator extends BaseDBOperator<Boolean> {
         ps.setInt(3, offer);
         if (ps.executeUpdate() == 0) {
             throw new Exception(
-                    "insertResponse(): error occured when inserting.");
+                    "insertResponse(): error occurred when inserting.");
         }
         return true;
     }
