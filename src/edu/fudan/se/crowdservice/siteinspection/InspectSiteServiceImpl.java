@@ -9,9 +9,9 @@ public class InspectSiteServiceImpl implements InspectSiteService {
 
 	@Override
 	public String siteInspect(String consumerId, int cost,
-			int deadline, String brand, String series, String newness,
-			String CPU, String memory, String hardDisk, String location,
-			String compositeService) {
+			int deadline,String compositeService,int resultNum, double latitude,double longitude, String brand, String series, String newness,
+			String CPU, String memory, String hardDisk, String location
+			) {
 		String xmlDoc = "<Root><Description>Please get to the designated location and inspect the second-hand computer specified "
 				+ "below. Check it and evaluate whether it is consistent with its description given below. Take a picture "
 				+ "of computer and upload the picture.</Description>"
@@ -36,7 +36,7 @@ public class InspectSiteServiceImpl implements InspectSiteService {
 				+ "</ChoiceInput></Root>";
 		String crowdService = InspectSiteService.class.getName();
 		long taskId = new InsertMicrotaskOperator(xmlDoc, consumerId, cost,
-				deadline, compositeService, crowdService).getResult();
+				deadline, compositeService, crowdService,resultNum,latitude,longitude).getResult();
 		String result = new SelectedLatestResponseAggregator().aggregate(
 				taskId, deadline);
 		System.out.println(result);

@@ -9,7 +9,7 @@ import javax.jws.soap.SOAPBinding.Style;
 @SOAPBinding(style = Style.RPC)
 public interface InspectSiteService {
 	@WebMethod
-	String siteInspect(String consumerId, int cost, int deadline,
+	String siteInspect(String consumerId, int cost, int deadline,String compositeService,int resultNum, double latitude,double longitude,
 			String brand, String series,String newness, String CPU, String memory, String hardDisk,
-			String location, String compositeService);
+			String location);
 }

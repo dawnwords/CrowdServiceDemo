@@ -15,7 +15,7 @@ public class AssessPriceServiceImpl implements AssessPriceService {
 
 	@Override
 	public String assessPrice(String consumerId, int cost, int deadline,
-			String compositeService, String brand, String series,
+			String compositeService,int resultNum, double latitude,double longitude, String brand, String series,
 			String newness, String CPU, String memory, String hardDisk,
 			String base64Image) {
 		String xmlDoc = "<Root><Description>Please access the price of the given second-hand "
@@ -40,7 +40,7 @@ public class AssessPriceServiceImpl implements AssessPriceService {
 				+ "<Key>the Price of this computer You Assess</Key><Value/></TextInput></Root>";
 		String crowdService = AssessPriceService.class.getName();
 		long taskId = new InsertMicrotaskOperator(xmlDoc, consumerId, cost,
-				deadline, compositeService, crowdService).getResult();
+				deadline, compositeService, crowdService,resultNum,latitude,longitude).getResult();
 		String result = new SelectedAverageResponseAggregator().aggregate(
 				taskId, deadline);
 		System.out.println(result);
