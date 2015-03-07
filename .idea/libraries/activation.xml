@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="activation">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../fse2015/ImageWebService/lib/activation.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../fse2015/ImageWebService/lib/commons-discovery-0.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../fse2015/ImageWebService/lib/commons-logging.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../fse2015/ImageWebService/lib/jaxrpc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../fse2015/ImageWebService/lib/mail.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../fse2015/ImageWebService/lib/saaj.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../fse2015/ImageWebService/lib/wsdl4j.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

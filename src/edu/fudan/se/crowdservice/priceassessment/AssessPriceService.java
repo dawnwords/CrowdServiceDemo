@@ -10,7 +10,7 @@ import javax.jws.soap.SOAPBinding.Style;
 public interface AssessPriceService {
 	@WebMethod
 	String assessPrice(String consumerId, int cost, int deadline,
-			String compositeService, String brand, String series,
+			String compositeService,int resultNum, double latitude,double longitude,String brand, String series,
 			String newness, String CPU, String memory, String hardDisk,
 			String base64Image);
 }

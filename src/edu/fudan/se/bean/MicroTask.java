@@ -10,9 +10,12 @@ public class MicroTask {
     public final int deadline;
     public final String compositeService;
     public final String crowdService;
+    public final int resultNum;
+    public final double longitude;
+    public final double latitude;
 
     public MicroTask(long id, String template, String consumer, int cost,
-                     int deadline, String compositeService, String crowdService) {
+                     int deadline, String compositeService, String crowdService,int resultNum,double longitude,double latitude) {
         this.id = id;
         this.template = template;
         this.consumer = consumer;
@@ -20,6 +23,9 @@ public class MicroTask {
         this.deadline = deadline;
         this.compositeService = compositeService;
         this.crowdService = crowdService;
+        this.resultNum = resultNum;
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 
     public int offerDDL() {

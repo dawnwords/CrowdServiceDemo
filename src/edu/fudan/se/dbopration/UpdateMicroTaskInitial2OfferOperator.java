@@ -15,7 +15,7 @@ public class UpdateMicroTaskInitial2OfferOperator extends
 	protected List<MicroTask> processData(Connection conn) throws Exception {
 		List<MicroTask> result = new LinkedList<MicroTask>();
 
-		String sql = "select id,template,consumer,cost,deadline,compositeService,crowdService from microtask where state=?";
+		String sql = "select id,template,consumer,cost,deadline,compositeService,crowdService,resultNum,longitude,latitude from microtask where state=?";
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setInt(1, MicroTask.State.INITIAL.ordinal());
 		ResultSet rs = ps.executeQuery();
@@ -29,8 +29,11 @@ public class UpdateMicroTaskInitial2OfferOperator extends
 			int deadline = rs.getInt(5);
 			String compositeService = rs.getString(6);
 			String crowdServie = rs.getString(7);
+			int resultNum = rs.getInt(8);
+			double longitude = rs.getDouble(9);
+			double latitude = rs.getDouble(10);
 			result.add(new MicroTask(id, template, consumer, cost, deadline,
-					compositeService, crowdServie));
+					compositeService, crowdServie,resultNum,longitude,latitude));
 			idList += id + ",";
 		}
 
