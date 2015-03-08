@@ -9,6 +9,6 @@ import javax.jws.soap.SOAPBinding.Style;
 @SOAPBinding(style = Style.RPC)
 public interface GlobalOptimization {
 	@WebMethod
-	String globalOptimize(String xml, long globalTime, double globalCost, String[] resultNum, String[] location);
+	String globalOptimize(String content);
 }
   
