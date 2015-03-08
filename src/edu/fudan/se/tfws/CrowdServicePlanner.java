@@ -12,20 +12,51 @@ import java.rmi.RemoteException;
 import java.util.*;
 
 public class CrowdServicePlanner {
-	public static List<AgentOffer> getSelectedAgent(String template,
+	static String step1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+			"<process name=\"Intermediary\"\n" +
+			"xmlns=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\"\n" +
+			"targetNamespace=\"http://enterprise.netbeans.org/bpel/BpelModule/Initiator\"\n" +
+			"xmlns:ext=\"http://pat.comp.nus.edu.sg/BPEL\"\n" +
+			"xmlns:bpel=\"http://ultraBpel/\">  \n" +
+			"<sequence>\n" +
+			"    <receive ext:responseTimeTag=\"customer\" partnerLink=\"customer\" operation=\"BuySecondhandItem\" variable=\"var\"  createInstance=\"yes\"/>\n" +
+			"       <invoke bpel:BPELCategory=\"GeneralService\" ext:crowdServiceName=\"edu.fudan.se.crowdservice.siteinspection.InspectSiteService\" partnerLink=\"PBS1\" operation=\"requestMS1\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+			"    <reply partnerLink=\"customer\" bpel:ReplyUser=\"true\" operation=\"BuySecondhandItem\" variable=\"result\"/>\n" +
+			"</sequence>\n" +
+			"</process>";
+
+	static String step2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+			"<process name=\"Intermediary\"\n" +
+			"xmlns=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\"\n" +
+			"targetNamespace=\"http://enterprise.netbeans.org/bpel/BpelModule/Initiator\"\n" +
+			"xmlns:ext=\"http://pat.comp.nus.edu.sg/BPEL\"\n" +
+			"xmlns:bpel=\"http://ultraBpel/\">  \n" +
+			"<sequence>\n" +
+			"    <receive ext:responseTimeTag=\"customer\" partnerLink=\"customer\" operation=\"BuySecondhandItem\" variable=\"var\"  createInstance=\"yes\"/>\n" +
+			"        <invoke bpel:BPELCategory=\"GeneralService\" ext:crowdServiceName=\"edu.fudan.se.crowdservice.priceassessment.AssessPriceService\" partnerLink=\"PBS1\" operation=\"requestMS1\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+			"    <reply partnerLink=\"customer\" bpel:ReplyUser=\"true\" operation=\"BuySecondhandItem\" variable=\"result\"/>\n" +
+			"</sequence>\n" +
+			"</process>";
+
+	public static List<AgentOffer> getSelectedAgent(String compositeService,
 			String crowdService, int cost, int deadline,int resultNum,double longitude,double latitude,
 			List<AgentOffer> candidates) {
 
-		String xml = crowdService;
+		String xml = "";
+		if(crowdService.contains("InspectSiteService")){
+			 xml = step1;
+		}
+
+		if(crowdService.contains("AssessPriceService")){
+			xml = step2;
+		}
+
 		ArrayOfKeyValueOfstringintKeyValueOfstringint[] resultNums = {new ArrayOfKeyValueOfstringintKeyValueOfstringint(crowdService,resultNum)};
 
-		HashMap<Integer,AgentOffer> guidMapping = new HashMap<Integer, AgentOffer>();
-		//accelerate the mapping speed when the selected result is back.
 		CrowdWorker[] partWorkers = new CrowdWorker[candidates.size()];
 
 		for(int i = 0; i <= partWorkers.length;i++){
 			AgentOffer ao = candidates.get(i);
-			guidMapping.put(i,ao);
 			double responseTime = getShortDistance(latitude+":"+longitude,ao.latitude+":"+ao.longitude)/1.1;
 			partWorkers[i] = new CrowdWorker((double)ao.offer,i,ao.reputation,(long)responseTime,false);
 		}
@@ -45,11 +76,10 @@ public class CrowdServicePlanner {
 
 			ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9 firstCSSeteled = ret.getCrowdServiceSelection()[0];
 			CrowdWorker[] values = firstCSSeteled.getValue();
-
 			ArrayList<AgentOffer> retList = new ArrayList<AgentOffer>();
 
 			for(CrowdWorker cw : values){
-				retList.add(guidMapping.get(cw.getIndex()));
+				retList.add(candidates.get(cw.getIndex()));
 			}
 			return retList;
 

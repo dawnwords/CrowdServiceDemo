@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import javafx.concurrent.Worker;
 import org.apache.axis.encoding.Base64;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -31,10 +32,16 @@ public abstract class Aggregator {
 		}
 		List<WorkerResponse> responses = new SelectResponseByMicroTaskOperator(
 				taskId).getResult();
+		int offerSum = 0;
+
+		for(WorkerResponse response : responses){
+			offerSum += response.offer;
+		}
+
 		String result = imagePath2Base64(aggregateResult(responses));
 		new UpdateMicroTaskProcessing2FinishOperator(taskId, acceptWorkerIds)
 				.getResult();
-		return result;
+		return result+":"+offerSum;
 	}
 
 	private String imagePath2Base64(String originXML) {

@@ -23,7 +23,7 @@ public class SelectResponseByMicroTaskOperator extends
 			throws Exception {
 		List<WorkerResponse> result = new LinkedList<WorkerResponse>();
 
-		String sql = "select id,worker,responseString,taskid,answerTime from workerresponse "
+		String sql = "select id,worker,responseString,taskid,answerTime,offer from workerresponse "
 				+ "where taskid = ? and isSelected=1 and answerTime is not null";
 		PreparedStatement ps = connection.prepareStatement(sql);
 		ps.setLong(1, taskId);
@@ -34,8 +34,9 @@ public class SelectResponseByMicroTaskOperator extends
 			String responseString = rs.getString(3);
 			long taskId = rs.getLong(4);
 			Date date = rs.getDate(5);
+			int offer = rs.getInt(6);
 			result.add(new WorkerResponse(id, worker, responseString, taskId,
-					date));
+					date,offer));
 		}
 		return result;
 	}
