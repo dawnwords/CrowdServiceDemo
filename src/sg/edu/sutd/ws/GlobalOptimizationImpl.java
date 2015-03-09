@@ -223,9 +223,9 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                             partCost += tmp.getCost();
                         }
                         response.setCost((int) partCost);
-                        response.setGlobalReliability(totalReliability);
                         response.setTime((int) partTime);
                     }
+                    response.setGlobalReliability(totalReliability);
                 }
             } catch (RemoteException e) {
                 e.printStackTrace();
