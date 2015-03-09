@@ -145,15 +145,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
     public String globalOptimize(String content) {
         Request request = new Gson().fromJson(content, Request.class);
         Response response = new Response();
-        long globalTimeConstraint = request.getGlobalCost();
-        double globalCostConstraint = request.getGlobalCost();
-        Map<String, Integer> resultNumsMap = request.getResultNumbers();
-        String[] serviceSequence = request.getServiceSequence();
-        String templateName = request.getTemplateName();
-        // TODO get consumer agentID from content
-        String consumerID = request.getConsumerId();
 
-        String xml = STEP_XML[serviceSequence.length];
+        String xml = STEP_XML[request.getServiceSequence().length];
 
         int idCounter = 0;
 //		int locationNum = locationStr.length;
@@ -169,14 +162,14 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
         ArrayOfKeyValueOfstringintKeyValueOfstringint[] resultNums = {};
         ArrayList<ArrayOfKeyValueOfstringintKeyValueOfstringint> al = new ArrayList<ArrayOfKeyValueOfstringintKeyValueOfstringint>();
 
-        for (Map.Entry<String, Integer> entry : resultNumsMap.entrySet()) {
+        for (Map.Entry<String, Integer> entry : request.getResultNumbers().entrySet()) {
             al.add(new ArrayOfKeyValueOfstringintKeyValueOfstringint(entry.getKey(), entry.getValue()));
         }
 
         resultNums = al.toArray(resultNums);
         int resultNumLen = resultNums.length;
         //=======================================
-        ArrayList<AgentInfo> agentInfos = removeRequester(consumerID);
+        ArrayList<AgentInfo> agentInfos = removeRequester(request.getConsumerId());
         if (agentInfos.size() > 0) {
 
             //delete consumer information who launches the request from the list of the online agents .
@@ -212,8 +205,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             try {
                 CrowdOptimizationResult ret = new CrowdServiceProxy().globalOptimize(
                         xml,
-                        globalTimeConstraint,
-                        globalCostConstraint,
+                        (long) request.getGlobalTime(),
+                        (double) request.getGlobalCost(),
                         aov,
                         resultNums,
                         400);
@@ -230,9 +223,9 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                             partCost += tmp.getCost();
                         }
                         response.setCost((int) partCost);
-                        response.setGlobalReliability(totalReliability);
                         response.setTime((int) partTime);
                     }
+                    response.setGlobalReliability(totalReliability);
                 }
             } catch (RemoteException e) {
                 e.printStackTrace();
