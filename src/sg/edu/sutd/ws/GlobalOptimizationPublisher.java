@@ -24,7 +24,8 @@ public class GlobalOptimizationPublisher {
     }
     private void publish() {
         int port = 8885;
-        String url = "http://10.131.253.172:" + port + "/globalOptimization";
+        String ip = "10.131.253.211";
+        String url = String.format("http://%s:%d/globaloptimization", ip, port);
         endpoint.publish(url);
         System.out.println("globalOptimization on Port : " + port);
     }
