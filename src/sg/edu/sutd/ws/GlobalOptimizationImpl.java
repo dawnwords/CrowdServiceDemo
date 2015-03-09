@@ -14,6 +14,7 @@ import sutd.edu.sg.CrowdWorker;
 import javax.jws.WebService;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 @WebService(endpointInterface = "sg.edu.sutd.ws.GlobalOptimization")
@@ -142,8 +143,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
     @Override
     public String globalOptimize(String content) {
-
         Request request = new Gson().fromJson(content, Request.class);
+        Response response = new Response();
         long globalTimeConstraint = request.getGlobalCost();
         double globalCostConstraint = request.getGlobalCost();
         Map<String, Integer> resultNumsMap = request.getResultNumbers();
@@ -153,7 +154,6 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
         String consumerID = request.getConsumerId();
 
         String xml = STEP_XML[serviceSequence.length];
-
 
         int idCounter = 0;
 //		int locationNum = locationStr.length;
@@ -173,92 +173,84 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             al.add(new ArrayOfKeyValueOfstringintKeyValueOfstringint(entry.getKey(), entry.getValue()));
         }
 
-
         resultNums = al.toArray(resultNums);
         int resultNumLen = resultNums.length;
         //=======================================
+        ArrayList<AgentInfo> agentInfos = removeRequester(consumerID);
+        if (agentInfos.size() > 0) {
 
-        ArrayList<AgentInfo> agentInfos = new SelectOnlineAgentInfoOperator().getResult();
+            //delete consumer information who launches the request from the list of the online agents .
+            CrowdWorker[] workers = new CrowdWorker[agentInfos.size()];
+            ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[] aov =
+                    new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[resultNumLen];
 
-        AgentInfo agentInfo2 = null;
-        int k = 0;
-        for(; k < agentInfos.size() ; k++){
-            if(agentInfo2.guid.equals(consumerID)){
-                break;
-            }
-        }
-
-        if(k > agentInfos.size()) {
-            System.out.println("The Consumer who launches the request is offline !!!");
-            return null;
-        }
-
-        agentInfos.remove(agentInfo2);
-        //delete consumer information who launches the request from the list of the online agents .
-
-        CrowdWorker[] workers = new CrowdWorker[agentInfos.size()];
-        ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[] aov =
-                new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[resultNumLen];
-
-        for (int i = 0; i < resultNumLen; i++) {
-            String crowdServiceName = resultNums[i].getKey();
+            for (int i = 0; i < resultNumLen; i++) {
+                String crowdServiceName = resultNums[i].getKey();
 //				BaseVariable bv = mapping.get(crowdServiceName);
 //					if(bv == null) return null;
-            double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
-            double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
-            double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
+                double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
+                double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
+                double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
 //			    String correspondingLocation = locationMap.get(crowdServiceName);
 
-            for (int j = 0; j < agentInfos.size(); j++) {
-
-                AgentInfo agentInfo = agentInfos.get(j);
+                for (int j = 0; j < agentInfos.size(); j++) {
+//                    AgentInfo agentInfo = agentInfos.get(j);
 //					double distance = correspondingLocation ==
 //							null ? 0 : getShortDistance(correspondingLocation,agentInfo.latitude+":"+agentInfo.longitude);
 //					double cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient*distance;
 //					long responseTime =  (long)(baseTimeConstant + distance / PACE_SPEED);
 
-                double cost = 5 + 4 * (Math.random() - 0.5);//TODO
-                long responseTime = 3000 + (long) (2000 * (Math.random() - 0.5));
+                    double cost = 3 + 4 * Math.random();//TODO
+                    long responseTime = 200 + (long) (200 * Math.random());
 
-                CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfos.get(i).reputation, responseTime, false);
-                workers[j] = worker;
-            }
-            aov[i] = new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdServiceName, workers);
-        }
-
-        try {
-            CrowdOptimizationResult ret = new CrowdServiceProxy().globalOptimize(
-                    xml,
-                    globalTimeConstraint,
-                    globalCostConstraint,
-                    aov,
-                    resultNums,
-                    400);
-            if (ret != null) {
-                double totalReliability = ret.getTotalReliability();
-                Response response = new Response();
-                if (ret.getCrowdServiceSelection().length > 0) {
-                    ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9 seletedWorker =
-                            ret.getCrowdServiceSelection()[0];
-                    CrowdWorker[] cw = seletedWorker.getValue();
-                    long partTime = 0;
-                    double partCost = 0;
-                    for (CrowdWorker tmp : cw) {
-                        partTime += tmp.getResponseTime();
-                        partCost += tmp.getCost();
-                    }
-                    response.setCost((int) partCost);
-                    response.setGlobalReliability(totalReliability);
-                    response.setTime((int) partTime);
+                    CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfos.get(j).reputation, responseTime, false);
+                    workers[j] = worker;
                 }
-                return new Gson().toJson(response);
+                aov[i] = new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdServiceName, workers);
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+            try {
+                CrowdOptimizationResult ret = new CrowdServiceProxy().globalOptimize(
+                        xml,
+                        globalTimeConstraint,
+                        globalCostConstraint,
+                        aov,
+                        resultNums,
+                        400);
+                if (ret != null) {
+                    double totalReliability = ret.getTotalReliability();
+                    if (ret.getCrowdServiceSelection().length > 0) {
+                        ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9 seletedWorker =
+                                ret.getCrowdServiceSelection()[0];
+                        CrowdWorker[] cw = seletedWorker.getValue();
+                        long partTime = 0;
+                        double partCost = 0;
+                        for (CrowdWorker tmp : cw) {
+                            partTime += tmp.getResponseTime();
+                            partCost += tmp.getCost();
+                        }
+                        response.setCost((int) partCost);
+                        response.setGlobalReliability(totalReliability);
+                        response.setTime((int) partTime);
+                    }
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return new Gson().toJson(response);
     }
 
+    private ArrayList<AgentInfo> removeRequester(String consumerID) {
+        ArrayList<AgentInfo> agentInfos = new SelectOnlineAgentInfoOperator().getResult();
 
+        Iterator<AgentInfo> iterator = agentInfos.iterator();
+        while (iterator.hasNext()) {
+            AgentInfo agentInfo2 = iterator.next();
+            if (consumerID.equals(agentInfo2.guid)) {
+                iterator.remove();
+            }
+        }
+        return agentInfos;
+    }
 }
