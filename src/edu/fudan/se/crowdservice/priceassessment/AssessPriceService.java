@@ -9,8 +9,8 @@ import javax.jws.soap.SOAPBinding.Style;
 @SOAPBinding(style = Style.RPC)
 public interface AssessPriceService {
 	@WebMethod
-	String assessPrice(String consumerId, int cost, int deadline,
-			String compositeService,int resultNum, double latitude,double longitude,String brand, String series,
+	String assessPrice(double latitude,double longitude,String consumerId, int cost, int deadline,
+			String compositeService,int resultNum, String brand, String series,
 			String newness, String CPU, String memory, String hardDisk,
 			String base64Image);
 }

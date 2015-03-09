@@ -14,8 +14,8 @@ import edu.fudan.se.dbopration.InsertMicrotaskOperator;
 public class AssessPriceServiceImpl implements AssessPriceService {
 
 	@Override
-	public String assessPrice(String consumerId, int cost, int deadline,
-			String compositeService,int resultNum, double latitude,double longitude, String brand, String series,
+	public String assessPrice(double latitude,double longitude,String consumerId, int cost, int deadline,
+			String compositeService,int resultNum , String brand, String series,
 			String newness, String CPU, String memory, String hardDisk,
 			String base64Image) {
 		String xmlDoc = "<Root><Description>Please access the price of the given second-hand "
