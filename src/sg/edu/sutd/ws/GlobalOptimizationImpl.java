@@ -149,6 +149,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
         Map<String, Integer> resultNumsMap = request.getResultNumbers();
         String[] serviceSequence = request.getServiceSequence();
         String templateName = request.getTemplateName();
+        // TODO get consumer agentID from content
+        String consumerID = request.getConsumerId();
 
         String xml = STEP_XML[serviceSequence.length];
 
@@ -177,6 +179,23 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
         //=======================================
 
         ArrayList<AgentInfo> agentInfos = new SelectOnlineAgentInfoOperator().getResult();
+
+        AgentInfo agentInfo2 = null;
+        int k = 0;
+        for(; k < agentInfos.size() ; k++){
+            if(agentInfo2.guid.equals(consumerID)){
+                break;
+            }
+        }
+
+        if(k > agentInfos.size()) {
+            System.out.println("The Consumer who launches the request is offline !!!");
+            return null;
+        }
+
+        agentInfos.remove(agentInfo2);
+        //delete consumer information who launches the request from the list of the online agents .
+
         CrowdWorker[] workers = new CrowdWorker[agentInfos.size()];
         ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[] aov =
                 new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[resultNumLen];
