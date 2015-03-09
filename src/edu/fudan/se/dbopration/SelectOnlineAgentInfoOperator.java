@@ -29,8 +29,8 @@ public class SelectOnlineAgentInfoOperator extends
 		while (rs.next()) {
 			agentInfos.add(new AgentInfo(rs.getString(1), 
 					rs.getString(2),
-					rs.getLong(3),
-					rs.getLong(4),
+					rs.getDouble(3),
+					rs.getDouble(4),
 					rs.getDouble(5)));
 		}
 		return agentInfos;
