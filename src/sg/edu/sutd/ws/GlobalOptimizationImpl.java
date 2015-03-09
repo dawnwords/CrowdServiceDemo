@@ -217,19 +217,21 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                     400);
             if (ret != null) {
                 double totalReliability = ret.getTotalReliability();
-                ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9 seletedWorker =
-                        ret.getCrowdServiceSelection()[0];
-                CrowdWorker[] cw = seletedWorker.getValue();
-                long partTime = 0;
-                double partCost = 0;
-                for (CrowdWorker tmp : cw) {
-                    partTime += tmp.getResponseTime();
-                    partCost += tmp.getCost();
-                }
                 Response response = new Response();
-                response.setCost((int) partCost);
-                response.setGlobalReliability(totalReliability);
-                response.setTime((int) partTime);
+                if (ret.getCrowdServiceSelection().length > 0) {
+                    ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9 seletedWorker =
+                            ret.getCrowdServiceSelection()[0];
+                    CrowdWorker[] cw = seletedWorker.getValue();
+                    long partTime = 0;
+                    double partCost = 0;
+                    for (CrowdWorker tmp : cw) {
+                        partTime += tmp.getResponseTime();
+                        partCost += tmp.getCost();
+                    }
+                    response.setCost((int) partCost);
+                    response.setGlobalReliability(totalReliability);
+                    response.setTime((int) partTime);
+                }
                 return new Gson().toJson(response);
             }
         } catch (RemoteException e) {
