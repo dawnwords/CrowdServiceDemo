@@ -33,8 +33,8 @@ public class SelectOfferByMicroTaskOperator extends
 		while (rs.next()) {
 			String guid = rs.getString(1);
 			String capacity = rs.getString(2);
-			long longitude = rs.getLong(3);
-			long latitude = rs.getLong(4);
+			double longitude = rs.getDouble(3);
+			double latitude = rs.getDouble(4);
 			double reputation = rs.getDouble(5);
 			int offer = rs.getInt(6);
 			result.add(new AgentOffer(guid, capacity, longitude, latitude,

@@ -224,6 +224,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         }
                         response.setCost((int) partCost);
                         response.setTime((int) partTime);
+                        System.out.println("partCost:" + partCost + " \t " + "partTime:" + partTime);
                     }
                     response.setGlobalReliability(totalReliability);
                 }
