@@ -144,6 +144,10 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
     @Override
     public String globalOptimize(String content) {
         Request request = new Gson().fromJson(content, Request.class);
+
+        double latitudePara = request.getTargetLatitude();
+        double longitudePara = request.getTargetLongitude();
+
         Response response = new Response();
 
         String xml = STEP_XML[request.getServiceSequence().length];
@@ -170,6 +174,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
         int resultNumLen = resultNums.length;
         //=======================================
         ArrayList<AgentInfo> agentInfos = removeRequester(request.getConsumerId());
+
         if (agentInfos.size() > 0) {
 
             //delete consumer information who launches the request from the list of the online agents .
@@ -177,31 +182,100 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[] aov =
                     new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[resultNumLen];
 
-            for (int i = 0; i < resultNumLen; i++) {
-                String crowdServiceName = resultNums[i].getKey();
-//				BaseVariable bv = mapping.get(crowdServiceName);
-//					if(bv == null) return null;
-                double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
-                double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
-                double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
-//			    String correspondingLocation = locationMap.get(crowdServiceName);
 
-                for (int j = 0; j < agentInfos.size(); j++) {
-//                    AgentInfo agentInfo = agentInfos.get(j);
-//					double distance = correspondingLocation ==
-//							null ? 0 : getShortDistance(correspondingLocation,agentInfo.latitude+":"+agentInfo.longitude);
-//					double cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient*distance;
-//					long responseTime =  (long)(baseTimeConstant + distance / PACE_SPEED);
+            if(latitudePara <= 1e-6 && longitudePara <= 1e-6) {
 
-                    double cost = 3 + 4 * Math.random();//TODO
-                    long responseTime = 200 + (long) (200 * Math.random());
+                double baseLongitude = BaseVariable.longitude;
+                double baseLatitude = BaseVariable.latitude;
 
-                    CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfos.get(j).reputation, responseTime, false);
-                    workers[j] = worker;
+                for (int i = 0; i < resultNumLen; i++) {
+                    String crowdServiceName = resultNums[i].getKey();
+                    double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
+                    double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
+                    double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
+                    for (int j = 0; j < agentInfos.size(); j++) {
+                        double cost;
+                        long responseTime;
+                        AgentInfo agentInfo = agentInfos.get(j);
+                        if (coefficient > 1e-6) {
+                            //即这个服务是位置相关的
+                            double distance = getShortDistance(baseLatitude + ":" + baseLongitude, agentInfo.latitude + ":" + agentInfo.longitude);
+                            cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient * distance;
+                            responseTime = (long) (baseTimeConstant + distance / PACE_SPEED);
+                        } else {
+                            cost = 2;
+                            responseTime = 30;
+                        }
+                        CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfo.reputation, responseTime, false);
+                        workers[j] = worker;
+                    }
+
+                    aov[i] = new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdServiceName, workers);
                 }
-                aov[i] = new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdServiceName, workers);
+            }else{
+                double baseLongitude ;
+                double baseLatitude ;
+                for (int i = 0; i < resultNumLen; i++) {
+                    String crowdServiceName = resultNums[i].getKey();
+                    if(crowdServiceName.contains("SiteInspectionService")){
+                        baseLongitude = longitudePara;
+                        baseLatitude = latitudePara;
+                    }
+                    else{
+                        baseLongitude = BaseVariable.longitude;
+                        baseLatitude = BaseVariable.latitude;
+                    }
+                    double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
+                    double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
+                    double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
+                    for (int j = 0; j < agentInfos.size(); j++) {
+                        double cost = 0;
+                        long responseTime = 0;
+                        AgentInfo agentInfo = agentInfos.get(j);
+                        if (coefficient > 1e-6) {
+                            //即这个服务是位置相关的
+                            double distance = getShortDistance(baseLatitude + ":" + baseLongitude, agentInfo.latitude + ":" + agentInfo.longitude);
+                            cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient * distance;
+                            responseTime = (long) (baseTimeConstant + distance / PACE_SPEED);
+                        } else {
+                            cost = 2;
+                            responseTime = 30;
+                        }
+                        CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfo.reputation, responseTime, false);
+                        workers[j] = worker;
+                    }
+
+                    aov[i] = new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdServiceName, workers);
+                }
             }
 
+
+//
+////				BaseVariable bv = mapping.get(crowdServiceName);
+////					if(bv == null) return null;
+//                    double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
+//                    double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
+//                    double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
+////			    String correspondingLocation = locationMap.get(crowdServiceName);
+//
+//                    for (int j = 0; j < agentInfos.size(); j++) {
+//                        AgentInfo agentInfo = agentInfos.get(j);
+//                        double distance = correspondingLocation ==
+//                                null ? 0 : getShortDistance(correspondingLocation,agentInfo.latitude+":"+agentInfo.longitude);
+//                        double cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient*distance;
+//                        long responseTime =  (long)(baseTimeConstant + distance / PACE_SPEED);
+//
+////                    double cost = 3 + 4 * Math.random();//TODO
+////                    long responseTime = 200 + (long) (200 * Math.random());
+//
+//                        CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfos.get(j).reputation, responseTime, false);
+//                        workers[j] = worker;
+//                    }
+//                    aov[i] = new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdServiceName, workers);
+//                }
+//
+//
+//            }
             try {
                 CrowdOptimizationResult ret = new CrowdServiceProxy().globalOptimize(
                         xml,

@@ -55,11 +55,20 @@ public class CrowdServicePlanner {
 
         CrowdWorker[] partWorkers = new CrowdWorker[candidates.size()];
 
-        for (int i = 0; i <= partWorkers.length; i++) {
-            AgentOffer ao = candidates.get(i);
-            double responseTime = getShortDistance(latitude + ":" + longitude, ao.latitude + ":" + ao.longitude) / 1.1;
-            partWorkers[i] = new CrowdWorker((double) ao.offer, i, ao.reputation, (long) responseTime, false);
+        if(longitude <= 1e-6 && longitude <= 1e-6) {
+            for (int i = 0; i <= partWorkers.length; i++) {
+                AgentOffer ao = candidates.get(i);
+                double responseTime = 30;
+                partWorkers[i] = new CrowdWorker((double) ao.offer, i, ao.reputation, (long) responseTime, false);
+            }
+        }else{
+            for (int i = 0; i <= partWorkers.length; i++) {
+                AgentOffer ao = candidates.get(i);
+                double responseTime = getShortDistance(latitude + ":" + longitude, ao.latitude + ":" + ao.longitude) / 1.1;
+                partWorkers[i] = new CrowdWorker((double) ao.offer, i, ao.reputation, (long) responseTime, false);
+            }
         }
+
 
         ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[] workers = {
                 new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdService, partWorkers)};
