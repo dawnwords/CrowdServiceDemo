@@ -25,15 +25,19 @@ public class UpdateMicroTaskProcessing2FinishOperator extends
         ps.setLong(2, taskId);
         int count = ps.executeUpdate();
         if (count > 0 && acceptWorkerIds.size() > 0) {
-            sql = "update workerresponse set isAccepted=1 where id in (?)";
-            ps = connection.prepareStatement(sql);
-            String acceptList = "";
-            for (long workerId : acceptWorkerIds) {
-                acceptList += workerId + ",";
+            String sqlQuestionMark = "";
+            for (int i = 0; i < acceptWorkerIds.size(); i++) {
+                sqlQuestionMark += "?,";
             }
-            acceptList = acceptList.substring(0, acceptList.length() - 1);
-            ps.setString(1, acceptList);
+            sqlQuestionMark = sqlQuestionMark.substring(0, sqlQuestionMark.length() - 1);
+            sql = String.format("update workerresponse set isAccepted=1 where worker in (%s)", sqlQuestionMark);
+            ps = connection.prepareStatement(sql);
+            int i = 1;
+            for (long workerId : acceptWorkerIds) {
+                ps.setLong(i++, workerId);
+            }
             ps.executeUpdate();
+            return true;
         }
         return false;
     }

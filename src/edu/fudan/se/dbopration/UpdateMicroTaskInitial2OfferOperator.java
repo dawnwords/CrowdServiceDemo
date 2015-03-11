@@ -20,7 +20,8 @@ public class UpdateMicroTaskInitial2OfferOperator extends
 		ps.setInt(1, MicroTask.State.INITIAL.ordinal());
 		ResultSet rs = ps.executeQuery();
 
-		String idList = "";
+
+		String sqlQuestionMark = "";
 		while (rs.next()) {
 			long id = rs.getLong(1);
 			String template = rs.getString(2);
@@ -34,16 +35,21 @@ public class UpdateMicroTaskInitial2OfferOperator extends
 			double latitude = rs.getDouble(10);
 			result.add(new MicroTask(id, template, consumer, cost, deadline,
 					compositeService, crowdServie,resultNum,longitude,latitude));
-			idList += id + ",";
+			sqlQuestionMark +=  "?,";
 		}
 
 		if (result.size() > 0) {
-			sql = "update microtask set state=? where id in (?)";
+			sqlQuestionMark = sqlQuestionMark.substring(0, sqlQuestionMark.length() - 1);
+			sql = String.format("update microtask set state=? where id in (%s)", sqlQuestionMark);
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, MicroTask.State.OFFER.ordinal());
-			ps.setString(2, idList.substring(0, idList.length() - 1));
+			int i = 2;
+			for (MicroTask mt  :result) {
+				ps.setLong(i++, mt.id);
+			}
 			ps.executeUpdate();
 		}
+
 		return result;
 	}
 }
