@@ -44,9 +44,7 @@ public class BroadcastDelegateBehaviour extends TickerBehaviour {
             List<AgentOffer> offerAgents = new SelectOfferByMicroTaskOperator(
                     offerTask).getResult();
             List<AgentOffer> selectedAgent = CrowdServicePlanner
-                    .getSelectedAgent(offerTask.compositeService,
-                            offerTask.crowdService, offerTask.cost,
-                            offerTask.deadline,offerTask.resultNum, offerTask.longitude,offerTask.latitude,offerAgents);
+                    .getSelectedAgent(offerTask,offerAgents);
             new UpdateOfferSelectOperator(selectedAgent).getResult();
             informDelegate(selectedAgent);
             informRefuse(offerAgents, selectedAgent);
