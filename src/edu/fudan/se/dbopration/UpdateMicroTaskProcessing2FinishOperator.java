@@ -30,7 +30,7 @@ public class UpdateMicroTaskProcessing2FinishOperator extends
                 sqlQuestionMark += "?,";
             }
             sqlQuestionMark = sqlQuestionMark.substring(0, sqlQuestionMark.length() - 1);
-            sql = String.format("update workerresponse set isAccepted=1 where worker in (%s)", sqlQuestionMark);
+            sql = String.format("update workerresponse set isAccepted=1 where id in (%s)", sqlQuestionMark);
             ps = connection.prepareStatement(sql);
             int i = 1;
             for (long workerId : acceptWorkerIds) {
