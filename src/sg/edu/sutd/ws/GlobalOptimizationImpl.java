@@ -15,12 +15,17 @@ import javax.jws.WebService;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 
 @WebService(endpointInterface = "sg.edu.sutd.ws.GlobalOptimization")
 public class GlobalOptimizationImpl implements GlobalOptimization {
 
     final public static double PACE_SPEED = 1.1;
+    public static final String SITE_INSPECTION = "service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService";
+    //locationStr的格式类似于{[InspectSiteService:latitude:longitude]},
+    //即,针对于全局优化的时候，对于单个用户的某一次执行请求的时候，
+
+    //	private HashMap<String, BaseVariable> mapping = new HashMap<String, BaseVariable>();
+    public static final String PRICE_ASSESSMENT = "service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService";
     static final String[] STEP_XML = {"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<process name=\"Intermediary\"\n" +
             "xmlns=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\"\n" +
@@ -29,19 +34,19 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             "xmlns:bpel=\"http://ultraBpel/\">  \n" +
             "<sequence>\n" +
             "\t<receive ext:responseTimeTag=\"customer\" partnerLink=\"customer\" operation=\"BuySecondhandItem\" variable=\"var\"  createInstance=\"yes\"/>\n" +
-            "\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"300;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t<flow>\n" +
-            "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"20;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:crowdServiceName=\"service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService\" partnerLink=\"PBS1\" operation=\"requestMS1\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\t\t\n" +
             "\t</flow>\n" +
-            "\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"120;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t<if ext:ifProb=\"0.5;0.5\">\n" +
             "\t\t<condition>ContinueYes</condition>\n" +
             "\t\t<sequence>\n" +
             "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:crowdServiceName=\"service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService\" partnerLink=\"PBS1\" operation=\"requestMS1\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t<if ext:ifProb=\"0.5;0.5\">\n" +
             "\t\t\t<condition>PriceOK</condition>\n" +
-            "\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"60;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t\t<else>\n" +
             "\t\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"0;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t\t</else>\n" +
@@ -62,17 +67,17 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             "<sequence>\n" +
             "\t<receive ext:responseTimeTag=\"customer\" partnerLink=\"customer\" operation=\"BuySecondhandItem\" variable=\"var\"  createInstance=\"yes\"/>\n" +
             "\t<flow>\n" +
-            "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"20;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:crowdServiceName=\"service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService\" partnerLink=\"PBS1\" operation=\"requestMS1\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\t\t\n" +
             "\t</flow>\n" +
-            "\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"120;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t<if ext:ifProb=\"0.5;0.5\">\n" +
             "\t\t<condition>ContinueYes</condition>\n" +
             "\t\t<sequence>\n" +
             "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:crowdServiceName=\"service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService\" partnerLink=\"PBS1\" operation=\"requestMS1\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t<if ext:ifProb=\"0.5;0.5\">\n" +
             "\t\t\t<condition>PriceOK</condition>\n" +
-            "\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"60;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t\t<else>\n" +
             "\t\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"0;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t\t</else>\n" +
@@ -84,7 +89,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             "\t</if>\t\n" +
             "\t<reply partnerLink=\"customer\" bpel:ReplyUser=\"true\" operation=\"BuySecondhandItem\" variable=\"result\"/>\n" +
             "</sequence>\n" +
-            "</process>", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "</process>", "", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<process name=\"Intermediary\"\n" +
             "xmlns=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\"\n" +
             "targetNamespace=\"http://enterprise.netbeans.org/bpel/BpelModule/Initiator\"\n" +
@@ -95,7 +100,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:crowdServiceName=\"service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService\" partnerLink=\"PBS1\" operation=\"requestMS1\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t<if ext:ifProb=\"0.5;0.5\">\n" +
             "\t\t\t<condition>PriceOK</condition>\n" +
-            "\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"60;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t\t<else>\n" +
             "\t\t\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"0;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t\t</else>\n" +
@@ -103,10 +108,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             "\t<reply partnerLink=\"customer\" bpel:ReplyUser=\"true\" operation=\"BuySecondhandItem\" variable=\"result\"/>\n" +
             "</sequence>\n" +
             "</process>"};
-    //locationStr的格式类似于{[InspectSiteService:latitude:longitude]},
-    //即,针对于全局优化的时候，对于单个用户的某一次执行请求的时候，
 
-    //	private HashMap<String, BaseVariable> mapping = new HashMap<String, BaseVariable>();
     public GlobalOptimizationImpl() {
 
     }
@@ -145,6 +147,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
     public String globalOptimize(String content) {
         Request request = new Gson().fromJson(content, Request.class);
 
+        System.out.println(content);
+
         double latitudePara = request.getTargetLatitude();
         double longitudePara = request.getTargetLongitude();
 
@@ -152,39 +156,33 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
         String xml = STEP_XML[request.getServiceSequence().length];
 
-        int idCounter = 0;
-//		int locationNum = locationStr.length;
-//		HashMap<String, String> locationMap = new HashMap<String, String>();
-//		for(int i = 0; i < locationNum ; i++){
-//			int startLocation = locationStr[i].indexOf(":");
-//			String csName = locationStr[i].substring(0, startLocation);//crowdService Name
-//			String correspondingLocation = locationStr[i].substring(startLocation+1, locationStr[i].length());
-//			locationMap.put(csName, correspondingLocation);
-//		}
+        System.out.println(xml + "\n");
 
-        //=======================================
+        int idCounter = 0;
+
         ArrayOfKeyValueOfstringintKeyValueOfstringint[] resultNums = {};
         ArrayList<ArrayOfKeyValueOfstringintKeyValueOfstringint> al = new ArrayList<ArrayOfKeyValueOfstringintKeyValueOfstringint>();
 
-        for (Map.Entry<String, Integer> entry : request.getResultNumbers().entrySet()) {
-            al.add(new ArrayOfKeyValueOfstringintKeyValueOfstringint(entry.getKey(), entry.getValue()));
+        if (request.getServiceSequence().length != 3) {
+            al.add(new ArrayOfKeyValueOfstringintKeyValueOfstringint(SITE_INSPECTION, request.getResultNumbers().get(SITE_INSPECTION)));
         }
+        al.add(new ArrayOfKeyValueOfstringintKeyValueOfstringint(PRICE_ASSESSMENT, request.getResultNumbers().get(PRICE_ASSESSMENT)));
 
         resultNums = al.toArray(resultNums);
         int resultNumLen = resultNums.length;
-        //=======================================
+
         ArrayList<AgentInfo> agentInfos = removeRequester(request.getConsumerId());
 
         if (agentInfos.size() > 0) {
 
             //delete consumer information who launches the request from the list of the online agents .
-            CrowdWorker[] workers = new CrowdWorker[agentInfos.size()];
+
             ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[] aov =
                     new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[resultNumLen];
 
 
-            if(latitudePara <= 1e-6 && longitudePara <= 1e-6) {
-
+            if (latitudePara <= 1e-6 && longitudePara <= 1e-6) {
+                System.out.println("invoking.....");
                 double baseLongitude = BaseVariable.longitude;
                 double baseLatitude = BaseVariable.latitude;
 
@@ -193,6 +191,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                     double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
                     double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
                     double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
+                    CrowdWorker[] workers = new CrowdWorker[agentInfos.size()];
                     for (int j = 0; j < agentInfos.size(); j++) {
                         double cost;
                         long responseTime;
@@ -203,28 +202,32 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                             cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient * distance;
                             responseTime = (long) (baseTimeConstant + distance / PACE_SPEED);
                         } else {
-                            cost = 2;
-                            responseTime = 30;
+                            cost = baseCostConstant;
+                            responseTime = (long) baseTimeConstant;
                         }
                         CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfo.reputation, responseTime, false);
+                        System.out.println(crowdServiceName + ":::::;WworkerInformation " + "cost" + cost + "index" + (idCounter - 1) + "reputation" + agentInfo.reputation + "responseTime" + responseTime + "\n");
                         workers[j] = worker;
                     }
 
                     aov[i] = new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdServiceName, workers);
                 }
-            }else{
-                double baseLongitude ;
-                double baseLatitude ;
+            } else {
+                double baseLongitude;
+                double baseLatitude;
                 for (int i = 0; i < resultNumLen; i++) {
                     String crowdServiceName = resultNums[i].getKey();
-                    if(crowdServiceName.contains("SiteInspectionService")){
+
+                    System.out.println("crowdServiceName : " + crowdServiceName);
+
+                    if (crowdServiceName.contains("SiteInspectionService")) {
                         baseLongitude = longitudePara;
                         baseLatitude = latitudePara;
-                    }
-                    else{
+                    } else {
                         baseLongitude = BaseVariable.longitude;
                         baseLatitude = BaseVariable.latitude;
                     }
+                    CrowdWorker[] workers = new CrowdWorker[agentInfos.size()];
                     double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
                     double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
                     double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
@@ -249,33 +252,6 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                 }
             }
 
-
-//
-////				BaseVariable bv = mapping.get(crowdServiceName);
-////					if(bv == null) return null;
-//                    double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
-//                    double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
-//                    double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
-////			    String correspondingLocation = locationMap.get(crowdServiceName);
-//
-//                    for (int j = 0; j < agentInfos.size(); j++) {
-//                        AgentInfo agentInfo = agentInfos.get(j);
-//                        double distance = correspondingLocation ==
-//                                null ? 0 : getShortDistance(correspondingLocation,agentInfo.latitude+":"+agentInfo.longitude);
-//                        double cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient*distance;
-//                        long responseTime =  (long)(baseTimeConstant + distance / PACE_SPEED);
-//
-////                    double cost = 3 + 4 * Math.random();//TODO
-////                    long responseTime = 200 + (long) (200 * Math.random());
-//
-//                        CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfos.get(j).reputation, responseTime, false);
-//                        workers[j] = worker;
-//                    }
-//                    aov[i] = new ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9(crowdServiceName, workers);
-//                }
-//
-//
-//            }
             try {
                 CrowdOptimizationResult ret = new CrowdServiceProxy().globalOptimize(
                         xml,
@@ -287,18 +263,21 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                 if (ret != null) {
                     double totalReliability = ret.getTotalReliability();
                     if (ret.getCrowdServiceSelection().length > 0) {
-                        ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9 seletedWorker =
-                                ret.getCrowdServiceSelection()[0];
+                        ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9 seletedWorker
+                                = ret.getCrowdServiceSelection()[(request.getServiceSequence().length == 3 ? 0 : 1)];
                         CrowdWorker[] cw = seletedWorker.getValue();
                         long partTime = 0;
                         double partCost = 0;
                         for (CrowdWorker tmp : cw) {
-                            partTime += tmp.getResponseTime();
+                            if(tmp.getResponseTime() > partTime){
+                              partTime = tmp.getResponseTime();
+                            }
                             partCost += tmp.getCost();
                         }
                         response.setCost((int) partCost);
                         response.setTime((int) partTime);
                         System.out.println("partCost:" + partCost + " \t " + "partTime:" + partTime);
+                        System.out.println("seletedWorker : " + seletedWorker);
                     }
                     response.setGlobalReliability(totalReliability);
                 }

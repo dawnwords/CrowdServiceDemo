@@ -34,7 +34,7 @@ public class InspectSiteServiceImpl implements InspectSiteService {
 				+ "<Key>Please Choose Consistent Degree</Key>"
 				+ "<Value>Very Consistent,Consistent,Not Consistent</Value>"
 				+ "</ChoiceInput></Root>";
-		String crowdService = InspectSiteService.class.getName();
+		String crowdService = "service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService";
 		long taskId = new InsertMicrotaskOperator(xmlDoc, consumerId, cost,
 				deadline, compositeService, crowdService,resultNum,latitude,longitude).getResult();
 		String result = new SelectedLatestResponseAggregator().aggregate(

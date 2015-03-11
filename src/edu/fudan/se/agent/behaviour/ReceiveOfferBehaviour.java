@@ -14,7 +14,7 @@ public class ReceiveOfferBehaviour extends MessageReceivingBehaviour<OfferWrappe
 
     @Override
     protected void handleMessage(AID sender, OfferWrapper offer) {
-        Boolean offerSuccess = new InsertOfferOperator(sender.getLocalName(), offer.taskId, offer.price).getResult();
+        Boolean offerSuccess = new InsertOfferOperator(sender.getLocalName(), offer).getResult();
         if (offerSuccess == null || !offerSuccess) {
             RefuseWrapper content = new RefuseWrapper(offer.taskId, RefuseWrapper.Reason.OFFER_OUT_OF_DATE);
             ACLUtil.sendMessage(myAgent, ConversationType.REFUSE, sender, content);

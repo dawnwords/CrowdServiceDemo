@@ -15,8 +15,8 @@ public class BaseVariable{
     public static final double latitude = 31.191204;
 
     static{
-        mapping.put("service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService", new BaseVariable(1,60,0));
-        mapping.put("service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService", new BaseVariable(1,60,0.02));
+        mapping.put("service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService", new BaseVariable(5,60,0));
+        mapping.put("service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService", new BaseVariable(1,10,0.02));
     }
 
     private double baseCostConst;//基础价格常量

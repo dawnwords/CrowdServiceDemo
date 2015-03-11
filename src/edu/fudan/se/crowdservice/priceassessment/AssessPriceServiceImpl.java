@@ -38,7 +38,7 @@ public class AssessPriceServiceImpl implements AssessPriceService {
 						Base64.decodeBase64(base64Image))
 				+ "</Value></ImageDisplay><TextInput>"
 				+ "<Key>the Price of this computer You Assess</Key><Value/></TextInput></Root>";
-		String crowdService = AssessPriceService.class.getName();
+		String crowdService = "service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService";
 		long taskId = new InsertMicrotaskOperator(xmlDoc, consumerId, cost,
 				deadline, compositeService, crowdService,resultNum,latitude,longitude).getResult();
 		String result = new SelectedAverageResponseAggregator().aggregate(
