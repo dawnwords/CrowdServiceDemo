@@ -6,7 +6,7 @@ import edu.fudan.se.dbopration.UpdateOnlineOperator;
 
 public class UpdateOnlineBehaviour extends TickerBehaviour {
 
-	private static final int TIMEOUT_SECOND = 10;
+	private static final int TIMEOUT_SECOND = 30;
 	
 	public UpdateOnlineBehaviour(Agent a) {
 		super(a, TIMEOUT_SECOND * 1000);

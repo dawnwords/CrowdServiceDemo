@@ -269,12 +269,12 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         long partTime = 0;
                         double partCost = 0;
                         for (CrowdWorker tmp : cw) {
-                            if(tmp.getResponseTime() > partTime){
-                              partTime = tmp.getResponseTime();
+                            if (tmp.getResponseTime() > partTime) {
+                                partTime = tmp.getResponseTime();
                             }
                             partCost += tmp.getCost();
                         }
-                        response.setCost((int) partCost);
+                        response.setCost((int) Math.rint(partCost));
                         response.setTime((int) partTime);
                         System.out.println("partCost:" + partCost + " \t " + "partTime:" + partTime);
                         System.out.println("seletedWorker : " + seletedWorker);
@@ -293,10 +293,11 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
         Iterator<AgentInfo> iterator = agentInfos.iterator();
         while (iterator.hasNext()) {
-            AgentInfo agentInfo2 = iterator.next();
-            if (consumerID.equals(agentInfo2.guid)) {
+            AgentInfo agentInfo = iterator.next();
+            if (consumerID.equals(agentInfo.guid)) {
                 iterator.remove();
             }
+            System.out.println("AgentInfo:" + agentInfo);
         }
         return agentInfos;
     }
