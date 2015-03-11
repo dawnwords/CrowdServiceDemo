@@ -19,7 +19,7 @@ public class SelectedLatestResponseAggregator extends Aggregator {
 				wr = response;
 			}
 		}
-		acceptWorker(wr.worker);
+		acceptWorkerResponseId(wr.id);
 		return wr.responseString;
 	}
 }
