@@ -35,22 +35,22 @@ public class AssessPriceServiceImpl implements AssessPriceService {
                               String compositeService, int resultNum, String brand, String series,
                               String newness, String CPU, String memory, String hardDisk,
                               String base64Image) {
-        System.out.println("latitude:" + latitude);
-        System.out.println("longitude:" + longitude);
-        System.out.println("consumerId:" + consumerId);
-        System.out.println("cost:" + cost);
-        System.out.println("deadline:" + deadline);
-        System.out.println("compositeService:" + compositeService);
-        System.out.println("resultNum:" + resultNum);
-        System.out.println("brand:" + brand);
-        System.out.println("series:" + series);
-        System.out.println("newness:" + newness);
-        System.out.println("CPU:" + CPU);
-        System.out.println("memory:" + memory);
-        System.out.println("hardDisk:" + hardDisk);
-        System.out.println("base64Image:" + base64Image);
+//        System.out.println("latitude:" + latitude);
+//        System.out.println("longitude:" + longitude);
+//        System.out.println("consumerId:" + consumerId);
+//        System.out.println("cost:" + cost);
+//        System.out.println("deadline:" + deadline);
+//        System.out.println("compositeService:" + compositeService);
+//        System.out.println("resultNum:" + resultNum);
+//        System.out.println("brand:" + brand);
+//        System.out.println("series:" + series);
+//        System.out.println("newness:" + newness);
+//        System.out.println("CPU:" + CPU);
+//        System.out.println("memory:" + memory);
+//        System.out.println("hardDisk:" + hardDisk);
+//        System.out.println("base64Image:" + base64Image);
 
-        String xmlDoc = "<Root><Description>Please access the price of the given second-hand "
+        String xmlDoc = "<Root><Description>Please assess the price of the given second-hand "
                 + "computer configuration based on the photo given.</Description>"
                 + "<TextDisplay><Key>Brand</Key><Value>"
                 + brand
@@ -75,7 +75,7 @@ public class AssessPriceServiceImpl implements AssessPriceService {
                 deadline, compositeService, crowdService, resultNum, latitude, longitude).getResult();
         String result = new SelectedAverageResponseAggregator().aggregate(
                 taskId, deadline);
-        System.out.println(result);
+//        System.out.println(result);
         return result;
     }
 }
