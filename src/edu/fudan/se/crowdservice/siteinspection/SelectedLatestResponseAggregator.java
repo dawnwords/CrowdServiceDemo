@@ -18,8 +18,8 @@ public class SelectedLatestResponseAggregator extends Aggregator {
 			if(wr.date.before(response.date)){
 				wr = response;
 			}
+			acceptWorkerResponseId(response.id);
 		}
-		acceptWorkerResponseId(wr.id);
 		return wr.responseString;
 	}
 }
