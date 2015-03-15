@@ -27,11 +27,11 @@ public class UpdateOfferSelectOperator extends BaseDBOperator<Boolean> {
             sqlQuestionMark += "?,";
         }
         sqlQuestionMark = sqlQuestionMark.substring(0, sqlQuestionMark.length() - 1);
-        String sql = String.format("update workerresponse set isSelected=1 where worker in (%s)", sqlQuestionMark);
+        String sql = String.format("update workerresponse set isSelected=1 where id in (%s)", sqlQuestionMark);
         PreparedStatement ps = connection.prepareStatement(sql);
         int i = 1;
         for (AgentOffer offer : offers) {
-            ps.setString(i++, offer.guid);
+            ps.setLong(i++, offer.id);
         }
         ps.executeUpdate();
         return true;

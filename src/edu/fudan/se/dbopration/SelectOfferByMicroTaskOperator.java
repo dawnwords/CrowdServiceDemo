@@ -23,7 +23,7 @@ public class SelectOfferByMicroTaskOperator extends
             throws Exception {
         List<AgentOffer> result = new LinkedList<AgentOffer>();
 
-        String sql = "select guid,capacity,longitude,latitude,reputation,offer,timeEstimate from agentinfo,workerresponse "
+        String sql = "select guid,capacity,longitude,latitude,reputation,offer,timeEstimate,workerresponse.id from agentinfo,workerresponse "
                 + "where workerresponse.taskid=? and agentinfo.guid = workerresponse.worker";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setLong(1, task.id);
@@ -37,8 +37,9 @@ public class SelectOfferByMicroTaskOperator extends
             double reputation = rs.getDouble(5);
             int offer = rs.getInt(6);
             int timeEstimate = rs.getInt(7);
-            result.add(new AgentOffer(guid, capacity, longitude, latitude,
-                    reputation, offer, timeEstimate));
+            long id = rs.getLong(8);
+            result.add(new AgentOffer(id, capacity, longitude, latitude, reputation, guid,
+                    offer, timeEstimate));
         }
         return result;
     }

@@ -62,7 +62,6 @@ public class AssessPriceServiceImpl implements AssessPriceService {
         logger.info("CPU:" + CPU);
         logger.info("memory:" + memory);
         logger.info("hardDisk:" + hardDisk);
-        logger.info("base64Image:" + base64Image);
 
         String xmlDoc = "<Root><Description>Please assess the price of the given second-hand "
                 + "computer configuration based on the photo given.</Description>"
