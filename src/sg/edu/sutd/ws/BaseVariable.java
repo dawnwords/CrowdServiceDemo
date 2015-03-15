@@ -5,39 +5,30 @@ import java.util.HashMap;
 /**
  * Created by Jiahuan on 2015/3/7.
  */
-public class BaseVariable{
+public class BaseVariable {
 
-
-
-
-    private static HashMap<String, BaseVariable> mapping = new HashMap<String, BaseVariable>();
     public static final double longitude = 121.598471;
     public static final double latitude = 31.191204;
+    private static HashMap<String, BaseVariable> mapping = new HashMap<String, BaseVariable>();
 
-    static{
-        mapping.put("service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService", new BaseVariable(5,60,0));
-        mapping.put("service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService", new BaseVariable(1,10,0.02));
+    static {
+        mapping.put("service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService", new BaseVariable(2, 150, 0, 1 / 0.6));
+        mapping.put("service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService", new BaseVariable(2, 20, 20.0 / 1000, 1 / 0.6));
     }
 
-    private double baseCostConst;//基础价格常量
-    private double baseTimeConst;//基本时间常量
-    private double coefficient;//每米价格是多少  //也用于判断是否是位置相关。
+    public final double baseCostConst;//基础价格常量
+    public final double baseTimeConst;//基本时间常量
+    public final double coeCost;//每米价格是多少  //也用于判断是否是位置相关。
+    public final double coeTime;
 
-    private BaseVariable(double baseCostConst, double baseTimeConst, double coefficient) {
-        super();
+    private BaseVariable(double baseCostConst, double baseTimeConst, double coeCost, double coeTime) {
         this.baseCostConst = baseCostConst;
         this.baseTimeConst = baseTimeConst;
-        this.coefficient = coefficient;
-
+        this.coeCost = coeCost;
+        this.coeTime = coeTime;
     }
 
-    public static double getCorrespondingBaseCostConst(String crowdService) {
-        return mapping.get(crowdService).baseCostConst;
-    }
-    public static double getCorrespondingBaseTimeConst(String crowdService) {
-        return mapping.get(crowdService).baseTimeConst;
-    }
-    public static double getCorrespondingCoefficient(String crowdService) {
-        return mapping.get(crowdService).coefficient;
+    public static BaseVariable getBaseVariableByServiceName(String crowdService) {
+        return mapping.get(crowdService);
     }
 }

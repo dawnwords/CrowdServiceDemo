@@ -19,7 +19,6 @@ import java.util.Iterator;
 @WebService(endpointInterface = "sg.edu.sutd.ws.GlobalOptimization")
 public class GlobalOptimizationImpl implements GlobalOptimization {
 
-    final public static double PACE_SPEED = 1.1;
     public static final String SITE_INSPECTION = "service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService";
     //locationStr的格式类似于{[InspectSiteService:latitude:longitude]},
     //即,针对于全局优化的时候，对于单个用户的某一次执行请求的时候，
@@ -34,7 +33,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             "xmlns:bpel=\"http://ultraBpel/\">  \n" +
             "<sequence>\n" +
             "\t<receive ext:responseTimeTag=\"customer\" partnerLink=\"customer\" operation=\"BuySecondhandItem\" variable=\"var\"  createInstance=\"yes\"/>\n" +
-            "\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
+            "\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"10;0;1\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t<flow>\n" +
             "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:QoS=\"1;0;0.9\" partnerLink=\"PBS\" operation=\"requestMS\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\n" +
             "\t\t<invoke bpel:BPELCategory=\"GeneralService\" ext:crowdServiceName=\"service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService\" partnerLink=\"PBS1\" operation=\"requestMS1\" inputVariable=\"MSInfo\"  outputVariable=\"ISOutput\"/>\t\t\n" +
@@ -118,13 +117,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
      *
      * @return 两个位置之间的距离
      */
-    private static double getShortDistance(String location1, String location2) {
-
-        double lat1 = Double.parseDouble(location1.split(":")[0]);
-        double lon1 = Double.parseDouble(location1.split(":")[1]);
-
-        double lat2 = Double.parseDouble(location2.split(":")[0]);
-        double lon2 = Double.parseDouble(location2.split(":")[1]);
+    private static double getShortDistance(double lat1, double lon1, double lat2, double lon2) {
 
         double a, b, R;
         R = 6378137; // 地球半径
@@ -147,7 +140,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
     public String globalOptimize(String content) {
         Request request = new Gson().fromJson(content, Request.class);
 
-        System.out.println(content);
+//        System.out.println(content);
 
         double latitudePara = request.getTargetLatitude();
         double longitudePara = request.getTargetLongitude();
@@ -156,7 +149,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
         String xml = STEP_XML[request.getServiceSequence().length];
 
-        System.out.println(xml + "\n");
+//        System.out.println(xml + "\n");
 
         int idCounter = 0;
 
@@ -182,31 +175,25 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
 
             if (latitudePara <= 1e-6 && longitudePara <= 1e-6) {
-                System.out.println("invoking.....");
+//                System.out.println("invoking.....");
                 double baseLongitude = BaseVariable.longitude;
                 double baseLatitude = BaseVariable.latitude;
 
                 for (int i = 0; i < resultNumLen; i++) {
                     String crowdServiceName = resultNums[i].getKey();
-                    double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
-                    double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
-                    double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
+                    BaseVariable v = BaseVariable.getBaseVariableByServiceName(crowdServiceName);
                     CrowdWorker[] workers = new CrowdWorker[agentInfos.size()];
                     for (int j = 0; j < agentInfos.size(); j++) {
                         double cost;
                         long responseTime;
                         AgentInfo agentInfo = agentInfos.get(j);
-                        if (coefficient > 1e-6) {
-                            //即这个服务是位置相关的
-                            double distance = getShortDistance(baseLatitude + ":" + baseLongitude, agentInfo.latitude + ":" + agentInfo.longitude);
-                            cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient * distance;
-                            responseTime = (long) (baseTimeConstant + distance / PACE_SPEED);
-                        } else {
-                            cost = baseCostConstant;
-                            responseTime = (long) baseTimeConstant;
-                        }
+
+                        double distance = getShortDistance(baseLatitude, baseLongitude, agentInfo.latitude, agentInfo.longitude);
+                        cost = v.baseCostConst + v.coeCost * distance;
+                        responseTime = (long) (v.baseTimeConst + v.coeTime * distance);
+
                         CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfo.reputation, responseTime, false);
-                        System.out.println(crowdServiceName + ":::::;WworkerInformation " + "cost" + cost + "index" + (idCounter - 1) + "reputation" + agentInfo.reputation + "responseTime" + responseTime + "\n");
+//                        System.out.println(crowdServiceName + ":::::;WworkerInformation " + "cost" + cost + "index" + (idCounter - 1) + "reputation" + agentInfo.reputation + "responseTime" + responseTime + "\n");
                         workers[j] = worker;
                     }
 
@@ -218,7 +205,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                 for (int i = 0; i < resultNumLen; i++) {
                     String crowdServiceName = resultNums[i].getKey();
 
-                    System.out.println("crowdServiceName : " + crowdServiceName);
+//                    System.out.println("crowdServiceName : " + crowdServiceName);
 
                     if (crowdServiceName.contains("SiteInspectionService")) {
                         baseLongitude = longitudePara;
@@ -228,22 +215,14 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         baseLatitude = BaseVariable.latitude;
                     }
                     CrowdWorker[] workers = new CrowdWorker[agentInfos.size()];
-                    double baseCostConstant = BaseVariable.getCorrespondingBaseCostConst(crowdServiceName);
-                    double baseTimeConstant = BaseVariable.getCorrespondingBaseTimeConst(crowdServiceName);
-                    double coefficient = BaseVariable.getCorrespondingCoefficient(crowdServiceName);
+                    BaseVariable v = BaseVariable.getBaseVariableByServiceName(crowdServiceName);
+
                     for (int j = 0; j < agentInfos.size(); j++) {
-                        double cost = 0;
-                        long responseTime = 0;
                         AgentInfo agentInfo = agentInfos.get(j);
-                        if (coefficient > 1e-6) {
-                            //即这个服务是位置相关的
-                            double distance = getShortDistance(baseLatitude + ":" + baseLongitude, agentInfo.latitude + ":" + agentInfo.longitude);
-                            cost = baseCostConstant + coefficient <= 1e-6 ? 0 : coefficient * distance;
-                            responseTime = (long) (baseTimeConstant + distance / PACE_SPEED);
-                        } else {
-                            cost = 2;
-                            responseTime = 30;
-                        }
+                        double distance = getShortDistance(baseLatitude, baseLongitude, agentInfo.latitude, agentInfo.longitude);
+                        double cost = v.baseCostConst + v.coeCost * distance;
+                        long responseTime = (long) (v.baseTimeConst + v.coeTime * distance);
+
                         CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfo.reputation, responseTime, false);
                         workers[j] = worker;
                     }
@@ -259,7 +238,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         (double) request.getGlobalCost(),
                         aov,
                         resultNums,
-                        400);
+                        50);
                 if (ret != null) {
                     double totalReliability = ret.getTotalReliability();
                     if (ret.getCrowdServiceSelection().length > 0) {
@@ -269,15 +248,15 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         long partTime = 0;
                         double partCost = 0;
                         for (CrowdWorker tmp : cw) {
-                            if(tmp.getResponseTime() > partTime){
-                              partTime = tmp.getResponseTime();
+                            if (tmp.getResponseTime() > partTime) {
+                                partTime = tmp.getResponseTime();
                             }
                             partCost += tmp.getCost();
                         }
-                        response.setCost((int) partCost);
+                        response.setCost((int) Math.rint(partCost));
                         response.setTime((int) partTime);
-                        System.out.println("partCost:" + partCost + " \t " + "partTime:" + partTime);
-                        System.out.println("seletedWorker : " + seletedWorker);
+//                        System.out.println("partCost:" + partCost + " \t " + "partTime:" + partTime);
+//                        System.out.println("seletedWorker : " + seletedWorker);
                     }
                     response.setGlobalReliability(totalReliability);
                 }
@@ -293,10 +272,11 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
         Iterator<AgentInfo> iterator = agentInfos.iterator();
         while (iterator.hasNext()) {
-            AgentInfo agentInfo2 = iterator.next();
-            if (consumerID.equals(agentInfo2.guid)) {
+            AgentInfo agentInfo = iterator.next();
+            if (consumerID.equals(agentInfo.guid)) {
                 iterator.remove();
             }
+//            System.out.println("AgentInfo:" + agentInfo);
         }
         return agentInfos;
     }
