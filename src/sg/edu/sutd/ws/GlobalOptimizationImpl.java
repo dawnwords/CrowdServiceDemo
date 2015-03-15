@@ -7,11 +7,15 @@ import edu.fudan.se.bean.AgentInfo;
 import edu.fudan.se.crowdservice.plan.Request;
 import edu.fudan.se.crowdservice.plan.Response;
 import edu.fudan.se.dbopration.SelectOnlineAgentInfoOperator;
+import jade.util.Logger;
 import sutd.edu.sg.CrowdOptimizationResult;
 import sutd.edu.sg.CrowdServiceProxy;
 import sutd.edu.sg.CrowdWorker;
 
 import javax.jws.WebService;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,8 +27,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
     //locationStr的格式类似于{[InspectSiteService:latitude:longitude]},
     //即,针对于全局优化的时候，对于单个用户的某一次执行请求的时候，
 
-    //	private HashMap<String, BaseVariable> mapping = new HashMap<String, BaseVariable>();
     public static final String PRICE_ASSESSMENT = "service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService";
+    public static final int ITERATION_TIMES = 400;
     static final String[] STEP_XML = {"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<process name=\"Intermediary\"\n" +
             "xmlns=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\"\n" +
@@ -107,9 +111,18 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             "\t<reply partnerLink=\"customer\" bpel:ReplyUser=\"true\" operation=\"BuySecondhandItem\" variable=\"result\"/>\n" +
             "</sequence>\n" +
             "</process>"};
+    private Logger logger = Logger.getJADELogger(getClass().getSimpleName());
+
+    static {
+        try {
+            System.setErr(new PrintStream(new FileOutputStream(new File("globalOptimize-error")), true));
+            System.setOut(new PrintStream(new FileOutputStream(new File("globalOptimize-out")), true));
+        } catch (Exception exp) {
+            exp.printStackTrace();
+        }
+    }
 
     public GlobalOptimizationImpl() {
-
     }
 
     /**
@@ -118,9 +131,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
      * @return 两个位置之间的距离
      */
     private static double getShortDistance(double lat1, double lon1, double lat2, double lon2) {
-
-        double a, b, R;
-        R = 6378137; // 地球半径
+        double a, b;
         lat1 = lat1 * Math.PI / 180.0;
         lat2 = lat2 * Math.PI / 180.0;
         a = lat1 - lat2;
@@ -129,10 +140,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
         double sa2, sb2;
         sa2 = Math.sin(a / 2.0);
         sb2 = Math.sin(b / 2.0);
-        d = 2
-                * R
-                * Math.asin(Math.sqrt(sa2 * sa2 + Math.cos(lat1)
-                * Math.cos(lat2) * sb2 * sb2));
+        d = 2 * 6378137 * Math.asin(Math.sqrt(sa2 * sa2 + Math.cos(lat1) * Math.cos(lat2) * sb2 * sb2));
         return d;
     }
 
@@ -140,7 +148,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
     public String globalOptimize(String content) {
         Request request = new Gson().fromJson(content, Request.class);
 
-//        System.out.println(content);
+        logger.info(content);
 
         double latitudePara = request.getTargetLatitude();
         double longitudePara = request.getTargetLongitude();
@@ -149,7 +157,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
         String xml = STEP_XML[request.getServiceSequence().length];
 
-//        System.out.println(xml + "\n");
+        logger.info(xml + "\n");
 
         int idCounter = 0;
 
@@ -175,7 +183,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
 
             if (latitudePara <= 1e-6 && longitudePara <= 1e-6) {
-//                System.out.println("invoking.....");
+                logger.info("invoking.....");
                 double baseLongitude = BaseVariable.longitude;
                 double baseLatitude = BaseVariable.latitude;
 
@@ -193,7 +201,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         responseTime = (long) (v.baseTimeConst + v.coeTime * distance);
 
                         CrowdWorker worker = new CrowdWorker(cost, idCounter++, agentInfo.reputation, responseTime, false);
-//                        System.out.println(crowdServiceName + ":::::;WworkerInformation " + "cost" + cost + "index" + (idCounter - 1) + "reputation" + agentInfo.reputation + "responseTime" + responseTime + "\n");
+                        logger.info(crowdServiceName + ":::::;WworkerInformation " + "cost" + cost + "index" + (idCounter - 1) + "reputation" + agentInfo.reputation + "responseTime" + responseTime + "\n");
                         workers[j] = worker;
                     }
 
@@ -205,7 +213,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                 for (int i = 0; i < resultNumLen; i++) {
                     String crowdServiceName = resultNums[i].getKey();
 
-//                    System.out.println("crowdServiceName : " + crowdServiceName);
+                    logger.info("crowdServiceName : " + crowdServiceName);
 
                     if (crowdServiceName.contains("SiteInspectionService")) {
                         baseLongitude = longitudePara;
@@ -238,7 +246,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         (double) request.getGlobalCost(),
                         aov,
                         resultNums,
-                        50);
+                        ITERATION_TIMES);
                 if (ret != null) {
                     double totalReliability = ret.getTotalReliability();
                     if (ret.getCrowdServiceSelection().length > 0) {
@@ -255,8 +263,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         }
                         response.setCost((int) Math.rint(partCost));
                         response.setTime((int) partTime);
-//                        System.out.println("partCost:" + partCost + " \t " + "partTime:" + partTime);
-//                        System.out.println("seletedWorker : " + seletedWorker);
+                        logger.info("partCost:" + partCost + " \t " + "partTime:" + partTime);
+                        logger.info("seletedWorker : " + seletedWorker);
                     }
                     response.setGlobalReliability(totalReliability);
                 }
@@ -276,7 +284,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             if (consumerID.equals(agentInfo.guid)) {
                 iterator.remove();
             }
-//            System.out.println("AgentInfo:" + agentInfo);
+            logger.info("AgentInfo:" + agentInfo);
         }
         return agentInfos;
     }

@@ -11,7 +11,8 @@ public class Main {
 
 	static {
 		try {
-			System.setErr(new PrintStream(new FileOutputStream(new File("error")),true));
+			System.setErr(new PrintStream(new FileOutputStream(new File("jade-error")),true));
+			System.setOut(new PrintStream(new FileOutputStream(new File("jade-out")),true));
 		} catch (Exception exp) {
 			exp.printStackTrace();
 		}

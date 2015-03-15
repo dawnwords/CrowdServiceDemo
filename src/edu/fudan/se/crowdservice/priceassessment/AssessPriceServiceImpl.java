@@ -1,14 +1,28 @@
 package edu.fudan.se.crowdservice.priceassessment;
 
 import edu.fudan.se.dbopration.InsertMicrotaskOperator;
+import jade.util.Logger;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.jws.WebService;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.Date;
 
 @WebService(endpointInterface = "edu.fudan.se.crowdservice.priceassessment.AssessPriceService")
 public class AssessPriceServiceImpl implements AssessPriceService {
+
+    static {
+        try {
+            System.setErr(new PrintStream(new FileOutputStream(new File("PA-error")), true));
+            System.setOut(new PrintStream(new FileOutputStream(new File("PA-out")), true));
+        } catch (Exception exp) {
+            exp.printStackTrace();
+        }
+    }
+
+    private Logger logger = Logger.getJADELogger(getClass().getSimpleName());
 
     private static String saveByteArray(String bytePath, byte[] bytes) {
         FileOutputStream fos = null;
@@ -35,20 +49,20 @@ public class AssessPriceServiceImpl implements AssessPriceService {
                               String compositeService, int resultNum, String brand, String series,
                               String newness, String CPU, String memory, String hardDisk,
                               String base64Image) {
-//        System.out.println("latitude:" + latitude);
-//        System.out.println("longitude:" + longitude);
-//        System.out.println("consumerId:" + consumerId);
-//        System.out.println("cost:" + cost);
-//        System.out.println("deadline:" + deadline);
-//        System.out.println("compositeService:" + compositeService);
-//        System.out.println("resultNum:" + resultNum);
-//        System.out.println("brand:" + brand);
-//        System.out.println("series:" + series);
-//        System.out.println("newness:" + newness);
-//        System.out.println("CPU:" + CPU);
-//        System.out.println("memory:" + memory);
-//        System.out.println("hardDisk:" + hardDisk);
-//        System.out.println("base64Image:" + base64Image);
+        logger.info("latitude:" + latitude);
+        logger.info("longitude:" + longitude);
+        logger.info("consumerId:" + consumerId);
+        logger.info("cost:" + cost);
+        logger.info("deadline:" + deadline);
+        logger.info("compositeService:" + compositeService);
+        logger.info("resultNum:" + resultNum);
+        logger.info("brand:" + brand);
+        logger.info("series:" + series);
+        logger.info("newness:" + newness);
+        logger.info("CPU:" + CPU);
+        logger.info("memory:" + memory);
+        logger.info("hardDisk:" + hardDisk);
+        logger.info("base64Image:" + base64Image);
 
         String xmlDoc = "<Root><Description>Please assess the price of the given second-hand "
                 + "computer configuration based on the photo given.</Description>"
@@ -75,7 +89,7 @@ public class AssessPriceServiceImpl implements AssessPriceService {
                 deadline, compositeService, crowdService, resultNum, latitude, longitude).getResult();
         String result = new SelectedAverageResponseAggregator().aggregate(
                 taskId, deadline);
-//        System.out.println(result);
+        logger.info(result);
         return result;
     }
 }
