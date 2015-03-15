@@ -2,6 +2,7 @@ package edu.fudan.se.aggregator;
 
 import edu.fudan.se.bean.WorkerResponse;
 import edu.fudan.se.dbopration.SelectResponseByMicroTaskOperator;
+import edu.fudan.se.dbopration.SelectResultNumByMicrotaskIdOperator;
 import edu.fudan.se.dbopration.UpdateMicroTaskProcessing2FinishOperator;
 import org.apache.axis.encoding.Base64;
 import org.dom4j.Document;
@@ -23,15 +24,9 @@ public abstract class Aggregator {
     }
 
     public String aggregate(long taskId, int deadline) {
-        try {
-            Thread.sleep(deadline * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        List<WorkerResponse> responses = new SelectResponseByMicroTaskOperator(
-                taskId).getResult();
-        int offerSum = 0;
+        List<WorkerResponse> responses = waitForWorkerResponses(taskId, deadline);
 
+        int offerSum = 0;
         for (WorkerResponse response : responses) {
             offerSum += response.offer;
         }
@@ -39,6 +34,25 @@ public abstract class Aggregator {
         String result = imagePath2Base64(aggregateResult(responses));
         new UpdateMicroTaskProcessing2FinishOperator(taskId, acceptWorkerResponseIds).getResult();
         return result + ":" + offerSum;
+    }
+
+    private List<WorkerResponse> waitForWorkerResponses(long taskId, int deadline) {
+        List<WorkerResponse> responses;
+        int i = 0;
+        do {
+            int resultNum = new SelectResultNumByMicrotaskIdOperator(taskId).getResult();
+            responses = new SelectResponseByMicroTaskOperator(taskId).getResult();
+            if (resultNum <= responses.size()) {
+                break;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            i++;
+        } while (i < deadline);
+        return responses;
     }
 
     private String imagePath2Base64(String originXML) {
