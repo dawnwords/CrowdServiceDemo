@@ -2,7 +2,7 @@ package edu.fudan.se.bean;
 
 public class MicroTask {
 
-    public static final double OFFER_RATIO = 0.2;
+    public static final double OFFER_RATIO = 0.3;
     public final long id;
     public final String template;
     public final String consumer;
