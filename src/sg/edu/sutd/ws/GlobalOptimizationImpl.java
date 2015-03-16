@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 
 @WebService(endpointInterface = "sg.edu.sutd.ws.GlobalOptimization")
@@ -28,7 +29,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
     //即,针对于全局优化的时候，对于单个用户的某一次执行请求的时候，
 
     public static final String PRICE_ASSESSMENT = "service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService";
-    public static final int ITERATION_TIMES = 400;
+    public static final int ITERATION_TIMES = 50;
     static final String[] STEP_XML = {"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<process name=\"Intermediary\"\n" +
             "xmlns=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\"\n" +
@@ -115,8 +116,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
 
     static {
         try {
-            System.setErr(new PrintStream(new FileOutputStream(new File("globalOptimize-error")), true));
-            System.setOut(new PrintStream(new FileOutputStream(new File("globalOptimize-out")), true));
+            System.setErr(new PrintStream(new FileOutputStream(new File("globalOptimize-error" + new Date().getTime())), true));
+            System.setOut(new PrintStream(new FileOutputStream(new File("globalOptimize-out" + new Date().getTime())), true));
         } catch (Exception exp) {
             exp.printStackTrace();
         }
@@ -240,6 +241,7 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
             }
 
             try {
+                long start = new Date().getTime();
                 CrowdOptimizationResult ret = new CrowdServiceProxy().globalOptimize(
                         xml,
                         (long) request.getGlobalTime(),
@@ -247,6 +249,8 @@ public class GlobalOptimizationImpl implements GlobalOptimization {
                         aov,
                         resultNums,
                         ITERATION_TIMES);
+                logger.info("Global Optimization Time:" + (new Date().getTime() - start));
+
                 if (ret != null) {
                     double totalReliability = ret.getTotalReliability();
                     if (ret.getCrowdServiceSelection().length > 0) {

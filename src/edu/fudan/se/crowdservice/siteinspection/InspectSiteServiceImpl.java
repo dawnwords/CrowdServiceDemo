@@ -7,13 +7,14 @@ import javax.jws.WebService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Date;
 
 @WebService(endpointInterface = "edu.fudan.se.crowdservice.siteinspection.InspectSiteService")
 public class InspectSiteServiceImpl implements InspectSiteService {
     static {
         try {
-            System.setErr(new PrintStream(new FileOutputStream(new File("SI-error")), true));
-            System.setOut(new PrintStream(new FileOutputStream(new File("SI-out")), true));
+            System.setErr(new PrintStream(new FileOutputStream(new File("SI-error" + new Date().getTime())), true));
+            System.setOut(new PrintStream(new FileOutputStream(new File("SI-out" + new Date().getTime())), true));
         } catch (Exception exp) {
             exp.printStackTrace();
         }

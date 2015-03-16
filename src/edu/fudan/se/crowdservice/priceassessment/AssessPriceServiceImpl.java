@@ -15,8 +15,8 @@ public class AssessPriceServiceImpl implements AssessPriceService {
 
     static {
         try {
-            System.setErr(new PrintStream(new FileOutputStream(new File("PA-error")), true));
-            System.setOut(new PrintStream(new FileOutputStream(new File("PA-out")), true));
+            System.setErr(new PrintStream(new FileOutputStream(new File("PA-error" + new Date().getTime())), true));
+            System.setOut(new PrintStream(new FileOutputStream(new File("PA-out" + new Date().getTime())), true));
         } catch (Exception exp) {
             exp.printStackTrace();
         }
