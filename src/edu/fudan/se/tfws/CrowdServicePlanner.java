@@ -4,18 +4,17 @@ import com.microsoft.schemas._2003._10.Serialization.Arrays.ArrayOfKeyValueOfstr
 import com.microsoft.schemas._2003._10.Serialization.Arrays.ArrayOfKeyValueOfstringintKeyValueOfstringint;
 import edu.fudan.se.bean.AgentOffer;
 import edu.fudan.se.bean.MicroTask;
+import edu.fudan.se.dbopration.UpdateTotalReliabilityOperator;
 import jade.util.Logger;
+import sg.edu.sutd.ws.BaseVariable;
 import sutd.edu.sg.CrowdOptimizationResult;
 import sutd.edu.sg.CrowdServiceProxy;
 import sutd.edu.sg.CrowdWorker;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CrowdServicePlanner {
-    private static Logger logger = Logger.getJADELogger(CrowdServicePlanner.class.getSimpleName());
-    
     static String step1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<process name=\"Intermediary\"\n" +
             "xmlns=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\"\n" +
@@ -28,7 +27,6 @@ public class CrowdServicePlanner {
             "    <reply partnerLink=\"customer\" bpel:ReplyUser=\"true\" operation=\"BuySecondhandItem\" variable=\"result\"/>\n" +
             "</sequence>\n" +
             "</process>";
-
     static String step2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<process name=\"Intermediary\"\n" +
             "xmlns=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\"\n" +
@@ -41,15 +39,20 @@ public class CrowdServicePlanner {
             "    <reply partnerLink=\"customer\" bpel:ReplyUser=\"true\" operation=\"BuySecondhandItem\" variable=\"result\"/>\n" +
             "</sequence>\n" +
             "</process>";
+    private static Logger logger = Logger.getJADELogger(CrowdServicePlanner.class.getSimpleName());
 
     public static List<AgentOffer> getSelectedAgent(MicroTask task, List<AgentOffer> candidates) {
         String xml = "";
+        BaseVariable variable = BaseVariable.getBaseVariableByServiceName(task.crowdService);
+        double minResponseTime = 0;
         logger.info(task.crowdService);
         if ("service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService".equals(task.crowdService)) {
             xml = step1;
+            minResponseTime = variable.baseTimeConst;
         }
         if ("service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService".equals(task.crowdService)) {
             xml = step2;
+            minResponseTime = variable.baseTimeConst * (1 - MicroTask.OFFER_RATIO) * 0.3;
         }
 
         ArrayOfKeyValueOfstringintKeyValueOfstringint[] resultNums = {new ArrayOfKeyValueOfstringintKeyValueOfstringint(task.crowdService, task.resultNum)};
@@ -58,8 +61,11 @@ public class CrowdServicePlanner {
 
         for (int i = 0; i < partWorkers.length; i++) {
             AgentOffer ao = candidates.get(i);
-            partWorkers[i] = new CrowdWorker((double) ao.offer, i, ao.reputation, (long) ao.timeEstimate, false);
-            logger.info("workInfo" + ao.offer + ":::index::::" + i + "ao.reputation" + ao.reputation + "ao.timeEstimate" + ao.timeEstimate);
+            double offer = (double) ao.offer;
+            double reputation = ao.reputation;
+            long responseTime = (long) (ao.timeEstimate > minResponseTime ? ao.timeEstimate : minResponseTime);
+            partWorkers[i] = new CrowdWorker(offer, i, reputation, responseTime, false);
+            logger.info("workInfo" + offer + ":::index::::" + i + "ao.reputation" + reputation + "ao.timeEstimate" + responseTime);
         }
 
         ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9[] workers = {
@@ -71,14 +77,16 @@ public class CrowdServicePlanner {
         try {
             CrowdOptimizationResult ret = new CrowdServiceProxy().globalOptimize(
                     xml,
-                    (long)(task.deadline * (1 - MicroTask.OFFER_RATIO)),
-                    (double)task.cost,
+                    (long) (task.deadline * (1 - MicroTask.OFFER_RATIO)),
+                    (double) task.cost,
                     workers,
                     resultNums,
-                    400);
+                    100);
             if (ret == null || ret.getCrowdServiceSelection().length <= 0) {
                 throw new Exception("the planner has a zero result");
             }
+
+            new UpdateTotalReliabilityOperator(task.id ,ret.getTotalReliability()).getResult();
 
             ArrayOfKeyValueOfstringArrayOfCrowdWorker8Qgdyvm9KeyValueOfstringArrayOfCrowdWorker8Qgdyvm9 firstCSSeteled = ret.getCrowdServiceSelection()[0];
             CrowdWorker[] values = firstCSSeteled.getValue();
