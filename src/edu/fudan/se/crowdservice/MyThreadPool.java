@@ -7,7 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 
 public class MyThreadPool extends ThreadPoolExecutor {
-    private static final int pool_size = 10;
+    private static final int pool_size = 100;
     private boolean is_paused;
     private ReentrantLock pause_lock = new ReentrantLock();
     private Condition unpaused = pause_lock.newCondition();
