@@ -8,8 +8,7 @@ import java.sql.ResultSet;
 import java.util.LinkedList;
 import java.util.List;
 
-public class UpdateMicroTaskOffer2ProcessingOperator extends
-        BaseDBOperator<List<MicroTask>> {
+public class UpdateMicroTaskOffer2PlanningOperator extends BaseDBOperator<List<MicroTask>> {
 
     @Override
     protected List<MicroTask> processData(Connection conn) throws Exception {
@@ -43,7 +42,7 @@ public class UpdateMicroTaskOffer2ProcessingOperator extends
             questionMarkList = questionMarkList.substring(0, questionMarkList.length() - 1);
             sql = String.format("update microtask set state=? where id in (%s)", questionMarkList);
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, MicroTask.State.PROCESSING.ordinal());
+            ps.setInt(1, MicroTask.State.PLANNING.ordinal());
             int i = 2;
             for (MicroTask task : result) {
                 ps.setLong(i++, task.id);

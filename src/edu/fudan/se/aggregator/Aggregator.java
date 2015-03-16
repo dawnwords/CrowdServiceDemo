@@ -1,8 +1,10 @@
 package edu.fudan.se.aggregator;
 
+import edu.fudan.se.bean.MicroTask;
 import edu.fudan.se.bean.WorkerResponse;
+import edu.fudan.se.dbopration.SelectMicrotaskStateByMicrotaskIdOperator;
+import edu.fudan.se.dbopration.SelectOfferSelectedNumByMicrotaskIdOperator;
 import edu.fudan.se.dbopration.SelectResponseByMicroTaskOperator;
-import edu.fudan.se.dbopration.SelectResultNumByMicrotaskIdOperator;
 import edu.fudan.se.dbopration.UpdateMicroTaskProcessing2FinishOperator;
 import org.apache.axis.encoding.Base64;
 import org.dom4j.Document;
@@ -13,6 +15,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.FileInputStream;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,7 +26,9 @@ public abstract class Aggregator {
         acceptWorkerResponseIds = new LinkedList<Long>();
     }
 
-    public String aggregate(long taskId, int deadline) {
+    public String aggregate(long taskId, int executingTime) {
+        Date deadline = new Date(new Date().getTime() + executingTime * 1000);
+        waitForProcessing(taskId);
         List<WorkerResponse> responses = waitForWorkerResponses(taskId, deadline);
 
         int offerSum = 0;
@@ -36,23 +41,31 @@ public abstract class Aggregator {
         return result + ":" + offerSum;
     }
 
-    private List<WorkerResponse> waitForWorkerResponses(long taskId, int deadline) {
+    private void waitForProcessing(long taskId) {
+        while (new SelectMicrotaskStateByMicrotaskIdOperator(taskId).getResult() != MicroTask.State.PROCESSING) {
+            sleep(1);
+        }
+    }
+
+    private List<WorkerResponse> waitForWorkerResponses(long taskId, Date deadline) {
         List<WorkerResponse> responses;
-        int i = 0;
         do {
-            int resultNum = new SelectResultNumByMicrotaskIdOperator(taskId).getResult();
+            int selectedNum = new SelectOfferSelectedNumByMicrotaskIdOperator(taskId).getResult();
             responses = new SelectResponseByMicroTaskOperator(taskId).getResult();
-            if (resultNum <= responses.size()) {
+            if (selectedNum <= responses.size()) {
                 break;
             }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            i++;
-        } while (i < deadline);
+            sleep(1);
+        } while (new Date().before(deadline));
         return responses;
+    }
+
+    private void sleep(int second) {
+        try {
+            Thread.sleep(second * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private String imagePath2Base64(String originXML) {

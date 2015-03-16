@@ -6,7 +6,8 @@ import edu.fudan.se.crowdservice.wrapper.ConversationType;
 import edu.fudan.se.crowdservice.wrapper.DelegateWrapper;
 import edu.fudan.se.crowdservice.wrapper.RefuseWrapper;
 import edu.fudan.se.dbopration.SelectOfferByMicroTaskOperator;
-import edu.fudan.se.dbopration.UpdateMicroTaskOffer2ProcessingOperator;
+import edu.fudan.se.dbopration.UpdateMicroTaskOffer2PlanningOperator;
+import edu.fudan.se.dbopration.UpdateMicroTaskPlanning2ProcessingOperator;
 import edu.fudan.se.dbopration.UpdateOfferSelectOperator;
 import edu.fudan.se.tfws.CrowdServicePlanner;
 import edu.fudan.se.util.XMLUtil;
@@ -25,8 +26,7 @@ public class BroadcastDelegateBehaviour extends TickerBehaviour {
 
     @Override
     protected void onTick() {
-        List<MicroTask> offerTasks = new UpdateMicroTaskOffer2ProcessingOperator()
-                .getResult();
+        List<MicroTask> offerTasks = new UpdateMicroTaskOffer2PlanningOperator().getResult();
         for (final MicroTask offerTask : offerTasks) {
             new TaskBroadCastThread(offerTask).start();
         }
@@ -41,13 +41,12 @@ public class BroadcastDelegateBehaviour extends TickerBehaviour {
 
         @Override
         public void run() {
-            List<AgentOffer> offerAgents = new SelectOfferByMicroTaskOperator(
-                    offerTask).getResult();
-            List<AgentOffer> selectedAgent = CrowdServicePlanner
-                    .getSelectedAgent(offerTask,offerAgents);
+            List<AgentOffer> offerAgents = new SelectOfferByMicroTaskOperator(offerTask).getResult();
+            List<AgentOffer> selectedAgent = CrowdServicePlanner.getSelectedAgent(offerTask, offerAgents);
             new UpdateOfferSelectOperator(selectedAgent).getResult();
             informDelegate(selectedAgent);
             informRefuse(offerAgents, selectedAgent);
+            new UpdateMicroTaskPlanning2ProcessingOperator(offerTask.id).getResult();
         }
 
         private void informRefuse(List<AgentOffer> offerAgents, List<AgentOffer> selectedAgents) {

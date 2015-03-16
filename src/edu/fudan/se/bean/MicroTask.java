@@ -15,7 +15,7 @@ public class MicroTask {
     public final double latitude;
 
     public MicroTask(long id, String template, String consumer, int cost,
-                     int deadline, String compositeService, String crowdService,int resultNum,double longitude,double latitude) {
+                     int deadline, String compositeService, String crowdService, int resultNum, double longitude, double latitude) {
         this.id = id;
         this.template = template;
         this.consumer = consumer;
@@ -45,7 +45,7 @@ public class MicroTask {
     }
 
     public static enum State {
-        INITIAL, OFFER, PROCESSING, FINISHED
+        INITIAL, OFFER, PLANNING, PROCESSING, FINISHED
     }
 
 }

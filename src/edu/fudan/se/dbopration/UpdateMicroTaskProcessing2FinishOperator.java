@@ -19,7 +19,7 @@ public class UpdateMicroTaskProcessing2FinishOperator extends
 
     @Override
     protected Boolean processData(Connection connection) throws Exception {
-        String sql = "update microtask set state = ? where id = ?";
+        String sql = "update microtask set state = ?, executingTime = timestampdiff(SECOND,createTime,current_timestamp()) where id = ?";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setInt(1, MicroTask.State.FINISHED.ordinal());
         ps.setLong(2, taskId);

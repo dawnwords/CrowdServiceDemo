@@ -1,5 +1,7 @@
 package edu.fudan.se.dbopration;
 
+import edu.fudan.se.bean.MicroTask;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,11 +21,11 @@ public class UpdateResponseOperator extends BaseDBOperator<Boolean> {
     @Override
     protected Boolean processData(Connection conn) throws Exception {
         String sql = "select workerresponse.id from workerresponse join microtask on workerresponse.taskid = microtask.id " +
-                "where workerresponse.worker=? and microtask.id=? and " +
-                "(microtask.deadline - time_to_sec(timediff(now(), microtask.createTime)) > 0)";
+                "where workerresponse.worker=? and microtask.id=? and microtask.state=?";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setString(1, worker);
         ps.setLong(2, taskid);
+        ps.setInt(3, MicroTask.State.PROCESSING.ordinal());
 
         ResultSet rs = ps.executeQuery();
 
