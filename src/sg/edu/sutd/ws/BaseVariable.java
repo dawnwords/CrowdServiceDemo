@@ -12,8 +12,8 @@ public class BaseVariable {
     private static HashMap<String, BaseVariable> mapping = new HashMap<String, BaseVariable>();
 
     static {
-        mapping.put("service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService", new BaseVariable(2, 50, 20.0 / 1000, 1 / 0.6));
-        mapping.put("service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService", new BaseVariable(2, 50, 0, 0));
+        mapping.put("service.shcomputer.cs.siteinspection.interfaces.SiteInspectionService", new BaseVariable(2, 50, 10.0 / 1000, 1 / 0.6));
+        mapping.put("service.shcomputer.cs.priceassessment.interfaces.PriceAssessmentService", new BaseVariable(2, 100, 0, 0));
     }
 
     public final double baseCostConst;//基础价格常量
